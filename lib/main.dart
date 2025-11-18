@@ -26,11 +26,17 @@ import 'features/care/care_tips_screen.dart';
 import 'features/care/reminders_screen.dart';
 import 'features/care/care_tips_controller.dart';
 import 'features/care/reminder_controller.dart';
+import 'features/care/health_controller.dart';
 import 'features/adoption/adoption_controller.dart';
 import 'features/adoption/adoption_requests_screen.dart';
 import 'features/home/dashboard_screen.dart';
 import 'features/profile/my_pets_screen.dart';
 import 'features/services/service_details_screen.dart';
+import 'features/care/health_records_screen.dart';
+import 'features/training/training_controller.dart';
+import 'features/training/training_screen.dart';
+import 'features/support/faq_controller.dart';
+import 'features/support/faq_support_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +67,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final CareTipsController careTipsController;
   late final ReminderController reminderController;
   late final AdoptionController adoptionController;
+  late final HealthController healthController;
+  late final TrainingController trainingController;
+  late final FaqController faqController;
 
   @override
   void initState() {
@@ -72,6 +81,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     careTipsController = CareTipsController()..load();
     reminderController = ReminderController()..load();
     adoptionController = AdoptionController()..load();
+    healthController = HealthController()..load();
+    trainingController = TrainingController()..load();
+    faqController = FaqController()..load();
   }
 
   @override
@@ -82,6 +94,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     careTipsController.dispose();
     reminderController.dispose();
     adoptionController.dispose();
+    healthController.dispose();
+    trainingController.dispose();
+    faqController.dispose();
     super.dispose();
   }
 
@@ -126,6 +141,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   careTipsController: careTipsController,
                   reminderController: reminderController,
                   adoptionController: adoptionController,
+                  healthController: healthController,
+                  trainingController: trainingController,
+                  faqController: faqController,
                 ),
             '/dashboard': (_) => DashboardScreen(
                   petController: petController,
@@ -153,7 +171,10 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                 ),
             '/care/tips': (_) => CareTipsScreen(controller: careTipsController),
             '/care/reminders': (_) => RemindersScreen(controller: reminderController),
+            '/care/health': (_) => HealthRecordsScreen(controller: healthController),
             '/adoption/requests': (_) => AdoptionRequestsScreen(controller: adoptionController),
+            '/training': (_) => TrainingScreen(controller: trainingController),
+            '/support/faq': (_) => FaqSupportScreen(controller: faqController),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/pet/details' && settings.arguments is PetDetailsArgs) {
@@ -181,6 +202,9 @@ class RootShell extends StatelessWidget {
   final CareTipsController careTipsController;
   final ReminderController reminderController;
   final AdoptionController adoptionController;
+  final HealthController healthController;
+  final TrainingController trainingController;
+  final FaqController faqController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -191,6 +215,9 @@ class RootShell extends StatelessWidget {
     required this.careTipsController,
     required this.reminderController,
     required this.adoptionController,
+    required this.healthController,
+    required this.trainingController,
+    required this.faqController,
   });
 
   @override

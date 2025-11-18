@@ -43,6 +43,34 @@ class DashboardScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _greetingHeader(context, t),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.health_and_safety_outlined,
+                  label: t('health_records'),
+                  onTap: () => Navigator.pushNamed(context, '/care/health'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.school_rounded,
+                  label: t('training'),
+                  onTap: () => Navigator.pushNamed(context, '/training'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.support_agent,
+                  label: t('help_center'),
+                  onTap: () => Navigator.pushNamed(context, '/support/faq'),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           _sectionTitle(t('upcoming_reminders')),
           _ReminderStrip(controller: reminderController),
@@ -106,6 +134,46 @@ class DashboardScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
       );
+}
+
+class _QuickCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _QuickCard({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 82,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 8))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            const Icon(Icons.chevron_right_rounded)
+          ],
+        ),
+      ).animate().fadeIn().slide(begin: const Offset(0, 0.08)),
+    );
+  }
 }
 
 class _ReminderStrip extends StatelessWidget {
