@@ -5,11 +5,15 @@ import '../../core/widgets/skeleton.dart';
 import '../../data/models/pet.dart';
 import '../../data/models/pet_reminder.dart';
 import '../../data/models/pet_service.dart';
+import '../../data/models/app_notification.dart';
+import '../../data/models/pet_journal_entry.dart';
 import '../care/care_tips_controller.dart';
 import '../care/reminder_controller.dart';
 import '../adoption/adoption_controller.dart';
 import '../home/pet_controller.dart';
 import '../services/service_controller.dart';
+import '../notifications/notification_controller.dart';
+import '../journal/journal_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PetController petController;
@@ -17,6 +21,8 @@ class DashboardScreen extends StatelessWidget {
   final CareTipsController careTipsController;
   final AdoptionController adoptionController;
   final ServiceController serviceController;
+  final NotificationController notificationController;
+  final JournalController journalController;
   const DashboardScreen({
     super.key,
     required this.petController,
@@ -24,6 +30,8 @@ class DashboardScreen extends StatelessWidget {
     required this.careTipsController,
     required this.adoptionController,
     required this.serviceController,
+    required this.notificationController,
+    required this.journalController,
   });
 
   @override
@@ -71,6 +79,32 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.notifications_none_rounded,
+                  label: t('notifications'),
+                  onTap: () => Navigator.pushNamed(context, '/notifications'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.book_outlined,
+                  label: t('journal'),
+                  onTap: () => Navigator.pushNamed(context, '/journal'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _sectionTitle(t('notifications')),
+          _NotificationStrip(controller: notificationController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('journal_recent')),
+          _JournalStrip(controller: journalController),
           const SizedBox(height: 16),
           _sectionTitle(t('upcoming_reminders')),
           _ReminderStrip(controller: reminderController),
@@ -173,6 +207,186 @@ class _QuickCard extends StatelessWidget {
         ),
       ).animate().fadeIn().slide(begin: const Offset(0, 0.08)),
     );
+  }
+}
+
+class _NotificationStrip extends StatelessWidget {
+  final NotificationController controller;
+  const _NotificationStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 150,
+      child: StreamBuilder<List<AppNotification>>(
+        stream: controller.notificationsStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 140, width: 220),
+              ),
+            );
+          }
+          final items = snapshot.data ?? [];
+          if (items.isEmpty) {
+            return Center(child: Text(t('empty_notifications')));
+          }
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final n = items[i];
+              final timeLabel = _timeAgo(n.createdAt, t);
+              return Container(
+                width: 240,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 10))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(n.icon, size: 18),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold))),
+                        if (!n.isRead)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor.withOpacity(0.14),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(t('new'), style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12)),
+                          )
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(n.body, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Text(timeLabel, style: Theme.of(context).textTheme.bodySmall),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.chevron_right_rounded),
+                          onPressed: () {
+                            controller.markRead(n);
+                            if (n.route != null) Navigator.pushNamed(context, n.route!);
+                          },
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ).animate().fadeIn();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  String _timeAgo(DateTime time, String Function(String) t) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+    if (diff.inMinutes < 1) return t('just_now');
+    if (diff.inHours < 1) return '${diff.inMinutes} ${t('minutes_ago')}';
+    if (diff.inHours < 24) return '${diff.inHours} ${t('hours_ago')}';
+    return '${diff.inDays} ${t('days_ago')}';
+  }
+}
+
+class _JournalStrip extends StatelessWidget {
+  final JournalController controller;
+  const _JournalStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 160,
+      child: StreamBuilder<List<PetJournalEntry>>(
+        stream: controller.entriesStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 150, width: 220),
+              ),
+            );
+          }
+          final entries = snapshot.data ?? [];
+          if (entries.isEmpty) {
+            return Center(child: Text(t('empty_journal')));
+          }
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: entries.length,
+            itemBuilder: (_, i) {
+              final entry = entries[i];
+              return Container(
+                width: 230,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(entry.mood, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(entry.title, style: const TextStyle(fontWeight: FontWeight.bold))),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(entry.petName, style: TextStyle(color: Theme.of(context).primaryColor)),
+                    const SizedBox(height: 6),
+                    Expanded(child: Text(entry.note, maxLines: 3, overflow: TextOverflow.ellipsis)),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(_timeAgo(entry.createdAt, t), style: Theme.of(context).textTheme.bodySmall),
+                    )
+                  ],
+                ),
+              ).animate().fadeIn();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  String _timeAgo(DateTime time, String Function(String) t) {
+    final now = DateTime.now();
+    final diff = now.difference(time);
+    if (diff.inMinutes < 1) return t('just_now');
+    if (diff.inHours < 1) return '${diff.inMinutes} ${t('minutes_ago')}';
+    if (diff.inHours < 24) return '${diff.inHours} ${t('hours_ago')}';
+    return '${diff.inDays} ${t('days_ago')}';
   }
 }
 

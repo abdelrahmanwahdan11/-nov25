@@ -6,16 +6,24 @@ import '../../data/models/pet.dart';
 import 'pet_controller.dart';
 import '../adoption/adoption_controller.dart';
 import '../care/reminder_controller.dart';
+import '../notifications/notification_controller.dart';
+import '../journal/journal_controller.dart';
+import '../../data/models/pet_journal_entry.dart';
+import '../../data/models/app_notification.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
   final AdoptionController adoptionController;
   final ReminderController reminderController;
+  final NotificationController notificationController;
+  final JournalController journalController;
   const HomeDiscoverScreen({
     super.key,
     required this.petController,
     required this.adoptionController,
     required this.reminderController,
+    required this.notificationController,
+    required this.journalController,
   });
 
   @override
@@ -46,9 +54,41 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
                       Text(t('discover_subtitle'), style: Theme.of(context).textTheme.bodyMedium),
                     ],
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pushNamed(context, '/pet/compare'),
-                    icon: const Icon(Icons.filter_alt_outlined),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pushNamed(context, '/notifications'),
+                        icon: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(Icons.notifications_none_rounded),
+                            Positioned(
+                              top: -2,
+                              right: -2,
+                              child: StreamBuilder<List<AppNotification>>(
+                                stream: widget.notificationController.notificationsStream,
+                                builder: (context, snapshot) {
+                                  final hasUnread = (snapshot.data ?? []).any((n) => !n.isRead);
+                                  if (!hasUnread) return const SizedBox.shrink();
+                                  return Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pushNamed(context, '/pet/compare'),
+                        icon: const Icon(Icons.filter_alt_outlined),
+                      )
+                    ],
                   )
                 ],
               ),
@@ -86,6 +126,8 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              _journalPeek(context, t),
               const SizedBox(height: 16),
               SizedBox(
                 height: 380,
@@ -133,6 +175,59 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _journalPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<PetJournalEntry>>(
+      stream: widget.journalController.entriesStream,
+      builder: (context, snapshot) {
+        if (widget.journalController.isLoading) {
+          return const Skeleton(height: 120, width: double.infinity);
+        }
+        final entries = snapshot.data ?? [];
+        if (entries.isEmpty) {
+          return _JournalCardPlaceholder(t: t, onTap: () => Navigator.pushNamed(context, '/journal'));
+        }
+        final latest = entries.first;
+        return GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/journal'),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 10))],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Icon(Icons.book_outlined),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('journal'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text('${latest.petName} · ${latest.title}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 4),
+                      Text(latest.note, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded)
+              ],
+            ),
+          ).animate().fadeIn().slide(begin: const Offset(0, 0.06)),
+        );
+      },
     );
   }
 
@@ -191,6 +286,35 @@ class _PetCard extends StatelessWidget {
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _JournalCardPlaceholder extends StatelessWidget {
+  final String Function(String) t;
+  final VoidCallback onTap;
+  const _JournalCardPlaceholder({required this.t, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 8))],
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.edit_note, size: 28),
+            const SizedBox(width: 10),
+            Expanded(child: Text(t('empty_journal'))),
+            const Icon(Icons.add),
           ],
         ),
       ),

@@ -16,6 +16,10 @@ import '../adoption/adoption_controller.dart';
 import '../adoption/adoption_requests_screen.dart';
 import '../home/dashboard_screen.dart';
 import 'my_pets_screen.dart';
+import '../notifications/notification_controller.dart';
+import '../notifications/notifications_screen.dart';
+import '../journal/journal_controller.dart';
+import '../journal/pet_journal_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
@@ -25,6 +29,8 @@ class ProfileScreen extends StatelessWidget {
   final CareTipsController careTipsController;
   final ReminderController reminderController;
   final AdoptionController adoptionController;
+  final NotificationController notificationController;
+  final JournalController journalController;
   const ProfileScreen({
     super.key,
     required this.petController,
@@ -34,6 +40,8 @@ class ProfileScreen extends StatelessWidget {
     required this.careTipsController,
     required this.reminderController,
     required this.adoptionController,
+    required this.notificationController,
+    required this.journalController,
   });
 
   @override
@@ -42,7 +50,15 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(t('profile')),
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none))],
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => NotificationsScreen(controller: notificationController)),
+            ),
+            icon: const Icon(Icons.notifications_none),
+          )
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -94,6 +110,8 @@ class ProfileScreen extends StatelessWidget {
                       careTipsController: careTipsController,
                       adoptionController: adoptionController,
                       serviceController: serviceController,
+                      notificationController: notificationController,
+                      journalController: journalController,
                     ),
                   ),
                 ),
@@ -153,6 +171,24 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => AdoptionRequestsScreen(controller: adoptionController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.notifications_rounded,
+                color: Colors.deepOrange,
+                title: t('notifications'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => NotificationsScreen(controller: notificationController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.book_outlined,
+                color: Colors.brown,
+                title: t('journal'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => PetJournalScreen(controller: journalController)),
                 ),
               ),
               _ActionCard(

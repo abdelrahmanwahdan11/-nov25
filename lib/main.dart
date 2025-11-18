@@ -37,6 +37,10 @@ import 'features/training/training_controller.dart';
 import 'features/training/training_screen.dart';
 import 'features/support/faq_controller.dart';
 import 'features/support/faq_support_screen.dart';
+import 'features/notifications/notification_controller.dart';
+import 'features/notifications/notifications_screen.dart';
+import 'features/journal/journal_controller.dart';
+import 'features/journal/pet_journal_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +74,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final HealthController healthController;
   late final TrainingController trainingController;
   late final FaqController faqController;
+  late final NotificationController notificationController;
+  late final JournalController journalController;
 
   @override
   void initState() {
@@ -84,6 +90,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     healthController = HealthController()..load();
     trainingController = TrainingController()..load();
     faqController = FaqController()..load();
+    notificationController = NotificationController()..load();
+    journalController = JournalController()..load();
   }
 
   @override
@@ -97,6 +105,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     healthController.dispose();
     trainingController.dispose();
     faqController.dispose();
+    notificationController.dispose();
+    journalController.dispose();
     super.dispose();
   }
 
@@ -144,6 +154,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   healthController: healthController,
                   trainingController: trainingController,
                   faqController: faqController,
+                  notificationController: notificationController,
+                  journalController: journalController,
                 ),
             '/dashboard': (_) => DashboardScreen(
                   petController: petController,
@@ -151,6 +163,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   careTipsController: careTipsController,
                   adoptionController: adoptionController,
                   serviceController: serviceController,
+                  notificationController: notificationController,
+                  journalController: journalController,
                 ),
             '/my-pets': (_) => MyPetsScreen(
                   petController: petController,
@@ -175,6 +189,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
             '/adoption/requests': (_) => AdoptionRequestsScreen(controller: adoptionController),
             '/training': (_) => TrainingScreen(controller: trainingController),
             '/support/faq': (_) => FaqSupportScreen(controller: faqController),
+            '/notifications': (_) => NotificationsScreen(controller: notificationController),
+            '/journal': (_) => PetJournalScreen(controller: journalController),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/pet/details' && settings.arguments is PetDetailsArgs) {
@@ -205,6 +221,8 @@ class RootShell extends StatelessWidget {
   final HealthController healthController;
   final TrainingController trainingController;
   final FaqController faqController;
+  final NotificationController notificationController;
+  final JournalController journalController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -218,6 +236,8 @@ class RootShell extends StatelessWidget {
     required this.healthController,
     required this.trainingController,
     required this.faqController,
+    required this.notificationController,
+    required this.journalController,
   });
 
   @override
@@ -227,6 +247,8 @@ class RootShell extends StatelessWidget {
         petController: petController,
         adoptionController: adoptionController,
         reminderController: reminderController,
+        notificationController: notificationController,
+        journalController: journalController,
       ),
       CatalogScreen(
         petController: petController,
@@ -241,6 +263,8 @@ class RootShell extends StatelessWidget {
         careTipsController: careTipsController,
         reminderController: reminderController,
         adoptionController: adoptionController,
+        notificationController: notificationController,
+        journalController: journalController,
       ),
     ];
     return Scaffold(
