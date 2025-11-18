@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../core/widgets/skeleton.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../data/models/pet.dart';
 import '../home/home_discover_screen.dart';
+import '../adoption/adoption_controller.dart';
+import '../care/reminder_controller.dart';
+import '../../data/models/pet_reminder.dart';
 
 class PetDetailsScreen extends StatelessWidget {
   final PetDetailsArgs args;
@@ -9,7 +13,11 @@ class PetDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
     final pet = args.pet;
+    final adoption = args.adoptionController;
+    final reminderController = args.reminderController;
+    final noteController = TextEditingController();
     return Scaffold(
       body: Stack(
         children: [
@@ -61,9 +69,9 @@ class PetDetailsScreen extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            _circleInfo('${pet.ageYears}y', 'Age'),
+                            _circleInfo('${pet.ageYears}y', t('age')),
                             const SizedBox(width: 12),
-                            _circleInfo('${pet.weightKg}kg', 'Weight'),
+                            _circleInfo('${pet.weightKg}kg', t('weight')),
                           ],
                         )
                       ],
@@ -75,8 +83,17 @@ class PetDetailsScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {},
-                            child: const Text('AI info'),
+                            onPressed: () async {
+                              await showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: Text(t('ai_info')),
+                                  content: Text(t('ai_placeholder')),
+                                  actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(t('close')))],
+                                ),
+                              );
+                            },
+                            child: Text(t('ai_info')),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -86,13 +103,41 @@ class PetDetailsScreen extends StatelessWidget {
                               await showDialog(
                                 context: context,
                                 builder: (_) => AlertDialog(
-                                  title: const Text('Adopt'),
-                                  content: const Text('Thanks for your interest! (mock dialog)'),
-                                  actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+                                  title: Text(t('adopt')),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('${t('adoption_note_for')} ${pet.name}'),
+                                      const SizedBox(height: 12),
+                                      TextField(
+                                        controller: noteController,
+                                        decoration: InputDecoration(hintText: t('note_optional')),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(context), child: Text(t('cancel'))),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        adoption?.submitRequest(pet, note: noteController.text);
+                                        reminderController?.addReminder(PetReminder(
+                                          id: DateTime.now().toString(),
+                                          title: 'Meet ${pet.name}',
+                                          timeLabel: 'This week',
+                                          type: 'Adoption',
+                                        ));
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(t('request_submitted'))),
+                                        );
+                                      },
+                                      child: Text(t('submit')),
+                                    ),
+                                  ],
                                 ),
                               );
                             },
-                            child: const Text('Adopt'),
+                            child: Text(t('adopt')),
                           ),
                         ),
                       ],

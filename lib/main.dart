@@ -20,6 +20,13 @@ import 'features/settings/settings_screen.dart';
 import 'features/home/pet_controller.dart';
 import 'features/services/service_controller.dart';
 import 'core/widgets/soft_bottom_nav.dart';
+import 'features/home/favorites_screen.dart';
+import 'features/care/care_tips_screen.dart';
+import 'features/care/reminders_screen.dart';
+import 'features/care/care_tips_controller.dart';
+import 'features/care/reminder_controller.dart';
+import 'features/adoption/adoption_controller.dart';
+import 'features/adoption/adoption_requests_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +54,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final PetController petController;
   late final ServiceController serviceController;
   late final BottomNavController navController;
+  late final CareTipsController careTipsController;
+  late final ReminderController reminderController;
+  late final AdoptionController adoptionController;
 
   @override
   void initState() {
@@ -55,6 +65,20 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     petController = PetController()..loadInitialPets();
     serviceController = ServiceController()..loadInitialServices();
     navController = BottomNavController();
+    careTipsController = CareTipsController()..load();
+    reminderController = ReminderController()..load();
+    adoptionController = AdoptionController()..load();
+  }
+
+  @override
+  void dispose() {
+    petController.dispose();
+    serviceController.dispose();
+    navController.dispose();
+    careTipsController.dispose();
+    reminderController.dispose();
+    adoptionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -94,6 +118,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   navController: navController,
                   petController: petController,
                   serviceController: serviceController,
+                  careTipsController: careTipsController,
+                  reminderController: reminderController,
+                  adoptionController: adoptionController,
                 ),
             '/pet/compare': (_) => CompareScreen(petController: petController),
             '/services': (_) => PetCareNearbyScreen(serviceController: serviceController),
@@ -101,6 +128,14 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   localeController: localeCtrl,
                   themeController: theme,
                 ),
+            '/favorites': (_) => FavoritesScreen(
+                  controller: petController,
+                  adoptionController: adoptionController,
+                  reminderController: reminderController,
+                ),
+            '/care/tips': (_) => CareTipsScreen(controller: careTipsController),
+            '/care/reminders': (_) => RemindersScreen(controller: reminderController),
+            '/adoption/requests': (_) => AdoptionRequestsScreen(controller: adoptionController),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/pet/details' && settings.arguments is PetDetailsArgs) {
@@ -125,6 +160,9 @@ class RootShell extends StatelessWidget {
   final BottomNavController navController;
   final PetController petController;
   final ServiceController serviceController;
+  final CareTipsController careTipsController;
+  final ReminderController reminderController;
+  final AdoptionController adoptionController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -132,18 +170,32 @@ class RootShell extends StatelessWidget {
     required this.navController,
     required this.petController,
     required this.serviceController,
+    required this.careTipsController,
+    required this.reminderController,
+    required this.adoptionController,
   });
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomeDiscoverScreen(petController: petController),
-      CatalogScreen(petController: petController),
+      HomeDiscoverScreen(
+        petController: petController,
+        adoptionController: adoptionController,
+        reminderController: reminderController,
+      ),
+      CatalogScreen(
+        petController: petController,
+        adoptionController: adoptionController,
+        reminderController: reminderController,
+      ),
       ProfileScreen(
         petController: petController,
         serviceController: serviceController,
         themeController: themeController,
         localeController: localeController,
+        careTipsController: careTipsController,
+        reminderController: reminderController,
+        adoptionController: adoptionController,
       ),
     ];
     return Scaffold(

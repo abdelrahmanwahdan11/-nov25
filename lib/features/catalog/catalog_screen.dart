@@ -4,10 +4,19 @@ import '../../core/widgets/skeleton.dart';
 import '../../data/models/pet.dart';
 import '../home/pet_controller.dart';
 import '../home/home_discover_screen.dart';
+import '../adoption/adoption_controller.dart';
+import '../care/reminder_controller.dart';
 
 class CatalogScreen extends StatefulWidget {
   final PetController petController;
-  const CatalogScreen({super.key, required this.petController});
+  final AdoptionController adoptionController;
+  final ReminderController reminderController;
+  const CatalogScreen({
+    super.key,
+    required this.petController,
+    required this.adoptionController,
+    required this.reminderController,
+  });
 
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
@@ -45,7 +54,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
             padding: const EdgeInsets.all(12.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search pets',
+                hintText: t('search_pets'),
                 prefixIcon: const Icon(Icons.search),
               ),
               onChanged: (v) {
@@ -97,7 +106,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
                     icon: Icon(pet.isFavorite ? Icons.favorite : Icons.favorite_border, color: pet.isFavorite ? Colors.red : null),
                     onPressed: () => widget.petController.toggleFavorite(pet),
                   ),
-                  onTap: () => Navigator.pushNamed(context, '/pet/details', arguments: PetDetailsArgs(pet)),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/pet/details',
+                    arguments: PetDetailsArgs(
+                      pet,
+                      adoptionController: widget.adoptionController,
+                      reminderController: widget.reminderController,
+                    ),
+                  ),
                   onLongPress: () => widget.petController.selectForCompare(pet),
                 );
               },

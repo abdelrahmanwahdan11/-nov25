@@ -7,18 +7,31 @@ import '../services/service_controller.dart';
 import '../settings/settings_screen.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/localization/locale_controller.dart';
+import '../care/care_tips_controller.dart';
+import '../care/care_tips_screen.dart';
+import '../care/reminder_controller.dart';
+import '../care/reminders_screen.dart';
+import '../home/favorites_screen.dart';
+import '../adoption/adoption_controller.dart';
+import '../adoption/adoption_requests_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
   final ServiceController serviceController;
   final ThemeController themeController;
   final LocaleController localeController;
+  final CareTipsController careTipsController;
+  final ReminderController reminderController;
+  final AdoptionController adoptionController;
   const ProfileScreen({
     super.key,
     required this.petController,
     required this.serviceController,
     required this.themeController,
     required this.localeController,
+    required this.careTipsController,
+    required this.reminderController,
+    required this.adoptionController,
   });
 
   @override
@@ -57,7 +70,60 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
+          _sectionTitle(t('quick_actions')),
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              _ActionCard(
+                icon: Icons.favorite,
+                color: Colors.pinkAccent,
+                title: t('favorites'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FavoritesScreen(
+                      controller: petController,
+                      adoptionController: adoptionController,
+                      reminderController: reminderController,
+                    ),
+                  ),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.article_rounded,
+                color: Colors.orangeAccent,
+                title: t('care_tips'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CareTipsScreen(controller: careTipsController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.alarm,
+                color: Colors.green,
+                title: t('reminders'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RemindersScreen(controller: reminderController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.assignment_turned_in_outlined,
+                color: Colors.blueAccent,
+                title: t('adoption_requests'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AdoptionRequestsScreen(controller: adoptionController)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           _sectionTitle(t('your_pets')),
           SizedBox(
             height: 160,
@@ -137,4 +203,39 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
       );
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final VoidCallback onTap;
+
+  const _ActionCard({required this.icon, required this.color, required this.title, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 10))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.18),
+              child: Icon(icon, color: color),
+            ),
+            const Spacer(),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
 }

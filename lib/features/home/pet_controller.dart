@@ -6,6 +6,7 @@ import '../../data/models/pet.dart';
 class PetController extends ChangeNotifier {
   final _petsStream = StreamController<List<Pet>>.broadcast();
   final _compareStream = StreamController<List<Pet>>.broadcast();
+  final _favoritesStream = StreamController<List<Pet>>.broadcast();
   List<Pet> _allPets = [];
   List<Pet> _visiblePets = [];
   List<Pet> _selectedForCompare = [];
@@ -15,6 +16,7 @@ class PetController extends ChangeNotifier {
 
   Stream<List<Pet>> get petsStream => _petsStream.stream;
   Stream<List<Pet>> get compareStream => _compareStream.stream;
+  Stream<List<Pet>> get favoritesStream => _favoritesStream.stream;
 
   Future<void> loadInitialPets() async {
     isLoading = true;
@@ -25,6 +27,7 @@ class PetController extends ChangeNotifier {
     _visiblePets = _allPets.take(_pageSize).toList();
     isLoading = false;
     _push();
+    _pushFavorites();
   }
 
   Future<void> refreshPets() async {
@@ -35,6 +38,7 @@ class PetController extends ChangeNotifier {
     _visiblePets = _allPets.take(_pageSize).toList();
     isLoading = false;
     _push();
+    _pushFavorites();
   }
 
   void loadMorePets() {
@@ -66,6 +70,7 @@ class PetController extends ChangeNotifier {
     _allPets = _allPets.map((p) => p.id == pet.id ? p.copyWith(isFavorite: !p.isFavorite) : p).toList();
     _visiblePets = _allPets.take(_visiblePets.length).toList();
     _push();
+    _pushFavorites();
   }
 
   void selectForCompare(Pet pet) {
@@ -91,10 +96,15 @@ class PetController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _pushFavorites() {
+    _favoritesStream.add(_allPets.where((p) => p.isFavorite).toList());
+  }
+
   @override
   void dispose() {
     _petsStream.close();
     _compareStream.close();
+    _favoritesStream.close();
     super.dispose();
   }
 }

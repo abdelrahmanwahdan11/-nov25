@@ -4,10 +4,19 @@ import '../../core/localization/app_localizations.dart';
 import '../../core/widgets/skeleton.dart';
 import '../../data/models/pet.dart';
 import 'pet_controller.dart';
+import '../adoption/adoption_controller.dart';
+import '../care/reminder_controller.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
-  const HomeDiscoverScreen({super.key, required this.petController});
+  final AdoptionController adoptionController;
+  final ReminderController reminderController;
+  const HomeDiscoverScreen({
+    super.key,
+    required this.petController,
+    required this.adoptionController,
+    required this.reminderController,
+  });
 
   @override
   State<HomeDiscoverScreen> createState() => _HomeDiscoverScreenState();
@@ -48,20 +57,33 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
                 height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: PetType.values
-                      .map((e) => Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: ChoiceChip(
-                              selectedColor: Theme.of(context).primaryColor,
-                              label: Text(e.name),
-                              selected: selectedType == e,
-                              onSelected: (_) {
-                                setState(() => selectedType = e);
-                                widget.petController.filterByType(e);
-                              },
-                            ),
-                          ))
-                      .toList(),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ChoiceChip(
+                        label: Text(t('all')),
+                        selected: selectedType == null,
+                        onSelected: (_) {
+                          setState(() => selectedType = null);
+                          widget.petController.refreshPets();
+                        },
+                      ),
+                    ),
+                    ...PetType.values
+                        .map((e) => Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: ChoiceChip(
+                                selectedColor: Theme.of(context).primaryColor,
+                                label: Text(e.name),
+                                selected: selectedType == e,
+                                onSelected: (_) {
+                                  setState(() => selectedType = e);
+                                  widget.petController.filterByType(e);
+                                },
+                              ),
+                            ))
+                        .toList(),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -115,7 +137,15 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
   }
 
   void _openDetails(Pet pet) {
-    Navigator.pushNamed(context, '/pet/details', arguments: PetDetailsArgs(pet));
+    Navigator.pushNamed(
+      context,
+      '/pet/details',
+      arguments: PetDetailsArgs(
+        pet,
+        adoptionController: widget.adoptionController,
+        reminderController: widget.reminderController,
+      ),
+    );
   }
 }
 
@@ -170,5 +200,7 @@ class _PetCard extends StatelessWidget {
 
 class PetDetailsArgs {
   final Pet pet;
-  PetDetailsArgs(this.pet);
+  final AdoptionController? adoptionController;
+  final ReminderController? reminderController;
+  PetDetailsArgs(this.pet, {this.adoptionController, this.reminderController});
 }
