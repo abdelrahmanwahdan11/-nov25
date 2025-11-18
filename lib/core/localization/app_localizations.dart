@@ -22,6 +22,9 @@ class AppLocalizations {
       'dashboard_greeting': "Stay on top of your pets",
       'my_pets': 'My pets',
       'care_plan': 'Care plan',
+      'care_planner': 'Care planner',
+      'care_planner_subtitle': 'Craft a calm day with hydration, walks, and meals',
+      'planner_today': 'Today\'s plan',
       'upcoming': 'Upcoming',
       'view_all': 'View all',
       'dark_mode': 'Dark mode',
@@ -118,6 +121,20 @@ class AppLocalizations {
       'minutes_ago': 'm ago',
       'hours_ago': 'h ago',
       'days_ago': 'd ago',
+      'add_quick_task': 'Add quick task',
+      'quick_add': 'Quick add',
+      'what_to_plan': 'What do you want to plan?',
+      'added_quickly': 'Added from quick add',
+      'save_plan': 'Save plan',
+      'mark_undone': 'Mark undone',
+      'supplies': 'Supplies',
+      'supplies_low': 'Supplies & stock',
+      'low_stock': 'Low stock',
+      'all_stock_ok': 'Everything is stocked',
+      'emergency_ready': 'Emergency ready',
+      'emergency_description': 'Save checklists and hotlines for stressful moments.',
+      'open_guide': 'Open guide',
+      'hotline_label': 'Hotline: {number}',
     },
     'ar': {
       'discover_title': 'اكتشف',
@@ -134,6 +151,9 @@ class AppLocalizations {
       'dashboard_greeting': 'تابع رعاية حيواناتك',
       'my_pets': 'حيواناتي',
       'care_plan': 'خطة العناية',
+      'care_planner': 'مخطط العناية',
+      'care_planner_subtitle': 'صمم يومًا هادئًا بالترطيب والمشي والوجبات',
+      'planner_today': 'خطة اليوم',
       'upcoming': 'القادم',
       'view_all': 'عرض الكل',
       'dark_mode': 'الوضع الداكن',
@@ -230,15 +250,34 @@ class AppLocalizations {
       'minutes_ago': 'دقائق مضت',
       'hours_ago': 'ساعات مضت',
       'days_ago': 'أيام مضت',
+      'add_quick_task': 'إضافة مهمة سريعة',
+      'quick_add': 'إضافة سريعة',
+      'what_to_plan': 'ماذا تريد أن تخطط؟',
+      'added_quickly': 'أضيفت من الإضافة السريعة',
+      'save_plan': 'حفظ الخطة',
+      'mark_undone': 'إلغاء الإنجاز',
+      'supplies': 'المستلزمات',
+      'supplies_low': 'المستلزمات والمخزون',
+      'low_stock': 'المخزون منخفض',
+      'all_stock_ok': 'كل شيء متوفر',
+      'emergency_ready': 'الجاهزية للطوارئ',
+      'emergency_description': 'احتفظ بالقوائم وأرقام الطوارئ للحظات الحرجة.',
+      'open_guide': 'فتح الدليل',
+      'hotline_label': 'خط الطوارئ: {number}',
     }
   };
 
-  String t(String key, {List<String>? args}) {
+  String t(String key, {List<String>? args, Map<String, String>? namedArgs}) {
     var value = _translations[locale.languageCode]?[key] ?? _translations['en']![key] ?? key;
     if (args != null && args.isNotEmpty) {
       for (var i = 0; i < args.length; i++) {
         value = value.replaceAll('{$i}', args[i]);
       }
+    }
+    if (namedArgs != null && namedArgs.isNotEmpty) {
+      namedArgs.forEach((placeholder, replacement) {
+        value = value.replaceAll('{$placeholder}', replacement);
+      });
     }
     return value;
   }

@@ -1,0 +1,48 @@
+import '../models/care_plan_item.dart';
+
+final mockCarePlan = [
+  CarePlanItem(
+    id: 'cp1',
+    petName: 'Luna',
+    title: 'Morning walk',
+    category: 'movement',
+    scheduledAt: '07:30',
+    durationMinutes: 30,
+    intensity: 'Light cardio',
+    note: 'Keep leash loose and reward calm sniffing.',
+    isDone: false,
+  ),
+  CarePlanItem(
+    id: 'cp2',
+    petName: 'Milo',
+    title: 'Hydration check',
+    category: 'hydration',
+    scheduledAt: '10:00',
+    durationMinutes: 5,
+    intensity: 'Gentle',
+    note: 'Refresh bowl and add ice cube for enrichment.',
+    isDone: true,
+  ),
+  CarePlanItem(
+    id: 'cp3',
+    petName: 'Bella',
+    title: 'Training reps',
+    category: 'training',
+    scheduledAt: '14:15',
+    durationMinutes: 20,
+    intensity: 'Focus',
+    note: 'Work on recall with high-value treats.',
+    isDone: false,
+  ),
+  CarePlanItem(
+    id: 'cp4',
+    petName: 'Luna',
+    title: 'Evening meal',
+    category: 'nutrition',
+    scheduledAt: '18:30',
+    durationMinutes: 15,
+    intensity: 'Balanced',
+    note: 'Add joint supplement and warm water.',
+    isDone: false,
+  ),
+];

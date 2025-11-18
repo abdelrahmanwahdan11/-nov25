@@ -20,6 +20,12 @@ import '../gallery/gallery_controller.dart';
 import '../../data/models/pet_achievement.dart';
 import '../../data/models/timeline_event.dart';
 import '../../data/models/pet_moment.dart';
+import '../care/care_planner_controller.dart';
+import '../care/supplies_controller.dart';
+import '../care/emergency_controller.dart';
+import '../../data/models/care_plan_item.dart';
+import '../../data/models/pet_supply.dart';
+import '../../data/models/emergency_guide.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PetController petController;
@@ -32,6 +38,9 @@ class DashboardScreen extends StatelessWidget {
   final AchievementsController achievementsController;
   final TimelineController timelineController;
   final GalleryController galleryController;
+  final CarePlannerController carePlannerController;
+  final SuppliesController suppliesController;
+  final EmergencyController emergencyController;
   const DashboardScreen({
     super.key,
     required this.petController,
@@ -44,6 +53,9 @@ class DashboardScreen extends StatelessWidget {
     required this.achievementsController,
     required this.timelineController,
     required this.galleryController,
+    required this.carePlannerController,
+    required this.suppliesController,
+    required this.emergencyController,
   });
 
   @override
@@ -111,6 +123,34 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.bolt_rounded,
+                  label: t('care_planner'),
+                  onTap: () => Navigator.pushNamed(context, '/care/planner'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.inventory_2_outlined,
+                  label: t('supplies'),
+                  onTap: () => Navigator.pushNamed(context, '/care/supplies'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.health_and_safety_rounded,
+                  label: t('emergency_ready'),
+                  onTap: () => Navigator.pushNamed(context, '/care/emergency'),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 14),
           _sectionTitle(t('achievements')),
           _AchievementStrip(controller: achievementsController),
@@ -126,6 +166,15 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _sectionTitle(t('journal_recent')),
           _JournalStrip(controller: journalController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('planner_today')),
+          _PlannerStrip(controller: carePlannerController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('supplies_low')),
+          _SuppliesStrip(controller: suppliesController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('emergency_ready')),
+          _EmergencyStrip(controller: emergencyController),
           const SizedBox(height: 16),
           _sectionTitle(t('upcoming_reminders')),
           _ReminderStrip(controller: reminderController),
@@ -604,6 +653,222 @@ class _JournalStrip extends StatelessWidget {
     if (diff.inHours < 1) return '${diff.inMinutes} ${t('minutes_ago')}';
     if (diff.inHours < 24) return '${diff.inHours} ${t('hours_ago')}';
     return '${diff.inDays} ${t('days_ago')}';
+  }
+}
+
+class _PlannerStrip extends StatelessWidget {
+  final CarePlannerController controller;
+  const _PlannerStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 150,
+      child: StreamBuilder<List<CarePlanItem>>(
+        stream: controller.itemsStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 140, width: 220),
+              ),
+            );
+          }
+          final items = snapshot.data ?? [];
+          if (items.isEmpty) return Center(child: Text(t('care_planner_subtitle')));
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final item = items[i];
+              return Container(
+                width: 230,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.14),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(item.category),
+                        ),
+                        const Spacer(),
+                        Text(item.scheduledAt, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text('${item.petName} · ${item.durationMinutes}m'),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Icon(item.isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+                            color: item.isDone ? Colors.green : Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(item.note, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                      ],
+                    )
+                  ],
+                ),
+              ).animate().fadeIn().slide(begin: const Offset(0, 0.08));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SuppliesStrip extends StatelessWidget {
+  final SuppliesController controller;
+  const _SuppliesStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 150,
+      child: StreamBuilder<List<PetSupply>>(
+        stream: controller.suppliesStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 140, width: 200),
+              ),
+            );
+          }
+          final items = (snapshot.data ?? []).where((s) => s.lowStock).toList();
+          if (items.isEmpty) return Center(child: Text(t('all_stock_ok')));
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final s = items[i];
+              return Container(
+                width: 200,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(s.category, style: Theme.of(context).textTheme.labelSmall),
+                    Text(s.name, maxLines: 2, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.inventory_2_outlined, size: 16, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 6),
+                        Text('${s.quantity} ${s.unit}'),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration:
+                              BoxDecoration(color: Colors.red.withOpacity(0.12), borderRadius: BorderRadius.circular(14)),
+                          child: Text(t('low_stock'), style: TextStyle(color: Colors.red.shade600)),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    )
+                  ],
+                ),
+              ).animate().fadeIn().slide(begin: const Offset(0, 0.08));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _EmergencyStrip extends StatelessWidget {
+  final EmergencyController controller;
+  const _EmergencyStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 150,
+      child: StreamBuilder<List<EmergencyGuide>>(
+        stream: controller.guidesStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 140, width: 220),
+              ),
+            );
+          }
+          final guides = snapshot.data ?? [];
+          if (guides.isEmpty) return Center(child: Text(t('emergency_description')));
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: guides.length,
+            itemBuilder: (_, i) {
+              final g = guides[i];
+              return Container(
+                width: 220,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.health_and_safety_rounded, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(g.title, maxLines: 2, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(g.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const Spacer(),
+                    Text(t('hotline_label', namedArgs: {'number': g.hotline})),
+                  ],
+                ),
+              ).animate().fadeIn().slide(begin: const Offset(0, 0.08));
+            },
+          );
+        },
+      ),
+    );
   }
 }
 

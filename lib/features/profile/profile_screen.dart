@@ -26,6 +26,12 @@ import '../timeline/timeline_controller.dart';
 import '../timeline/activity_timeline_screen.dart';
 import '../gallery/gallery_controller.dart';
 import '../gallery/pet_gallery_screen.dart';
+import '../care/care_planner_controller.dart';
+import '../care/care_planner_screen.dart';
+import '../care/supplies_controller.dart';
+import '../care/supplies_screen.dart';
+import '../care/emergency_controller.dart';
+import '../care/emergency_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
@@ -40,6 +46,9 @@ class ProfileScreen extends StatelessWidget {
   final AchievementsController achievementsController;
   final TimelineController timelineController;
   final GalleryController galleryController;
+  final CarePlannerController carePlannerController;
+  final SuppliesController suppliesController;
+  final EmergencyController emergencyController;
   const ProfileScreen({
     super.key,
     required this.petController,
@@ -54,6 +63,9 @@ class ProfileScreen extends StatelessWidget {
     required this.achievementsController,
     required this.timelineController,
     required this.galleryController,
+    required this.carePlannerController,
+    required this.suppliesController,
+    required this.emergencyController,
   });
 
   @override
@@ -116,20 +128,23 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                  builder: (_) => DashboardScreen(
-                    petController: petController,
-                    reminderController: reminderController,
-                    careTipsController: careTipsController,
-                    adoptionController: adoptionController,
-                    serviceController: serviceController,
-                    notificationController: notificationController,
-                    journalController: journalController,
-                    achievementsController: achievementsController,
-                    timelineController: timelineController,
-                    galleryController: galleryController,
+                    builder: (_) => DashboardScreen(
+                      petController: petController,
+                      reminderController: reminderController,
+                      careTipsController: careTipsController,
+                      adoptionController: adoptionController,
+                      serviceController: serviceController,
+                      notificationController: notificationController,
+                      journalController: journalController,
+                      achievementsController: achievementsController,
+                      timelineController: timelineController,
+                      galleryController: galleryController,
+                      carePlannerController: carePlannerController,
+                      suppliesController: suppliesController,
+                      emergencyController: emergencyController,
+                    ),
                   ),
                 ),
-              ),
               ),
               _ActionCard(
                 icon: Icons.pets_outlined,
@@ -144,6 +159,35 @@ class ProfileScreen extends StatelessWidget {
                       reminderController: reminderController,
                     ),
                   ),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.bolt_rounded,
+                color: Colors.orange,
+                title: t('care_planner'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CarePlannerScreen(controller: carePlannerController),
+                  ),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.inventory_2_outlined,
+                color: Colors.indigo,
+                title: t('supplies'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SuppliesScreen(controller: suppliesController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.health_and_safety_outlined,
+                color: Colors.redAccent,
+                title: t('emergency_ready'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => EmergencyScreen(controller: emergencyController)),
                 ),
               ),
               _ActionCard(

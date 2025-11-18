@@ -16,6 +16,12 @@ import '../gallery/gallery_controller.dart';
 import '../../data/models/timeline_event.dart';
 import '../../data/models/pet_moment.dart';
 import '../../data/models/pet_achievement.dart';
+import '../care/care_planner_controller.dart';
+import '../care/supplies_controller.dart';
+import '../care/emergency_controller.dart';
+import '../../data/models/care_plan_item.dart';
+import '../../data/models/pet_supply.dart';
+import '../../data/models/emergency_guide.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
@@ -26,6 +32,9 @@ class HomeDiscoverScreen extends StatefulWidget {
   final AchievementsController achievementsController;
   final TimelineController timelineController;
   final GalleryController galleryController;
+  final CarePlannerController carePlannerController;
+  final SuppliesController suppliesController;
+  final EmergencyController emergencyController;
   const HomeDiscoverScreen({
     super.key,
     required this.petController,
@@ -36,6 +45,9 @@ class HomeDiscoverScreen extends StatefulWidget {
     required this.achievementsController,
     required this.timelineController,
     required this.galleryController,
+    required this.carePlannerController,
+    required this.suppliesController,
+    required this.emergencyController,
   });
 
   @override
@@ -139,6 +151,12 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              _plannerPeek(context, t),
+              const SizedBox(height: 12),
+              _suppliesPeek(context, t),
+              const SizedBox(height: 12),
+              _emergencyPeek(context, t),
+              const SizedBox(height: 16),
               _journalPeek(context, t),
               const SizedBox(height: 16),
               _achievementsPeek(context, t),
@@ -193,6 +211,63 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _plannerPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<CarePlanItem>>(
+      stream: widget.carePlannerController.itemsStream,
+      builder: (context, snapshot) {
+        if (widget.carePlannerController.isLoading) {
+          return const Skeleton(height: 110, width: double.infinity);
+        }
+        final items = snapshot.data ?? [];
+        final top = items.isNotEmpty ? items.first : null;
+        return _PeekCard(
+          title: t('planner_today'),
+          subtitle: top != null ? '${top.title} · ${top.scheduledAt}' : t('care_planner_subtitle'),
+          icon: Icons.bolt_rounded,
+          onTap: () => Navigator.pushNamed(context, '/care/planner'),
+        );
+      },
+    );
+  }
+
+  Widget _suppliesPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<PetSupply>>(
+      stream: widget.suppliesController.suppliesStream,
+      builder: (context, snapshot) {
+        if (widget.suppliesController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final lows = (snapshot.data ?? []).where((s) => s.lowStock).toList();
+        final label = lows.isNotEmpty ? '${lows.first.name} (${lows.first.quantity} ${lows.first.unit})' : t('all_stock_ok');
+        return _PeekCard(
+          title: t('supplies_low'),
+          subtitle: label,
+          icon: Icons.inventory_2_outlined,
+          onTap: () => Navigator.pushNamed(context, '/care/supplies'),
+        );
+      },
+    );
+  }
+
+  Widget _emergencyPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder(
+      stream: widget.emergencyController.guidesStream,
+      builder: (context, snapshot) {
+        if (widget.emergencyController.isLoading) {
+          return const Skeleton(height: 110, width: double.infinity);
+        }
+        final guides = snapshot.data as List<EmergencyGuide>? ?? [];
+        final text = guides.isNotEmpty ? guides.first.title : t('emergency_description');
+        return _PeekCard(
+          title: t('emergency_ready'),
+          subtitle: text,
+          icon: Icons.health_and_safety_rounded,
+          onTap: () => Navigator.pushNamed(context, '/care/emergency'),
+        );
+      },
     );
   }
 
@@ -487,6 +562,53 @@ class _PetCard extends StatelessWidget {
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PeekCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+  const _PeekCard({required this.title, required this.subtitle, required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 8))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded)
           ],
         ),
       ),
