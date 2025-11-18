@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../core/localization/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final dynamic localeController;
@@ -60,7 +61,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, '/auth/login'),
+                onPressed: () async {
+                  await _completeOnboarding();
+                  if (mounted) {
+                    Navigator.pushReplacementNamed(context, '/auth/login');
+                  }
+                },
                 child: Text(t('skip')),
               ),
             ),
@@ -115,6 +121,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_index == _pages.length - 1) {
+                        _completeOnboarding();
                         Navigator.pushReplacementNamed(context, '/auth/login');
                       } else {
                         _controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -133,5 +140,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_seen', true);
   }
 }

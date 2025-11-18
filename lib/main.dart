@@ -10,6 +10,7 @@ import 'features/home/home_discover_screen.dart';
 import 'features/catalog/catalog_screen.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'features/onboarding/splash_decider.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/signup_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
@@ -27,6 +28,9 @@ import 'features/care/care_tips_controller.dart';
 import 'features/care/reminder_controller.dart';
 import 'features/adoption/adoption_controller.dart';
 import 'features/adoption/adoption_requests_screen.dart';
+import 'features/home/dashboard_screen.dart';
+import 'features/profile/my_pets_screen.dart';
+import 'features/services/service_details_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,7 +112,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
             GlobalCupertinoLocalizations.delegate,
           ],
           routes: {
-            '/': (_) => OnboardingScreen(localeController: localeCtrl),
+            '/': (_) => SplashDecider(localeController: localeCtrl),
+            '/onboarding': (_) => OnboardingScreen(localeController: localeCtrl),
             '/auth/login': (_) => LoginScreen(authController: authController),
             '/auth/signup': (_) => SignUpScreen(authController: authController),
             '/auth/forgot': (_) => ForgotPasswordScreen(),
@@ -122,8 +127,21 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   reminderController: reminderController,
                   adoptionController: adoptionController,
                 ),
+            '/dashboard': (_) => DashboardScreen(
+                  petController: petController,
+                  reminderController: reminderController,
+                  careTipsController: careTipsController,
+                  adoptionController: adoptionController,
+                  serviceController: serviceController,
+                ),
+            '/my-pets': (_) => MyPetsScreen(
+                  petController: petController,
+                  adoptionController: adoptionController,
+                  reminderController: reminderController,
+                ),
             '/pet/compare': (_) => CompareScreen(petController: petController),
             '/services': (_) => PetCareNearbyScreen(serviceController: serviceController),
+            '/services/details': (context) => const ServiceDetailsScreen(),
             '/settings': (_) => SettingsScreen(
                   localeController: localeCtrl,
                   themeController: theme,

@@ -49,6 +49,7 @@ class PetCareNearbyScreen extends StatelessWidget {
                         (s) => Card(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           child: ListTile(
+                            onTap: () => Navigator.pushNamed(context, '/services/details', arguments: s),
                             leading: CircleAvatar(backgroundImage: NetworkImage(s.imageUrl)),
                             title: Text(s.name),
                             subtitle: Text('${s.distanceKm}km • ${s.rating}⭐\n${s.services.join(', ')}'),

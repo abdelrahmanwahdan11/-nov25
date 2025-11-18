@@ -121,7 +121,7 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/home'),
+                onPressed: () => Navigator.pushNamed(context, '/dashboard'),
                 icon: const Icon(Icons.pets),
                 label: Text(t('see_more')),
                 style: ElevatedButton.styleFrom(

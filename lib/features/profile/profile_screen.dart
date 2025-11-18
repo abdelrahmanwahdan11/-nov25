@@ -14,6 +14,8 @@ import '../care/reminders_screen.dart';
 import '../home/favorites_screen.dart';
 import '../adoption/adoption_controller.dart';
 import '../adoption/adoption_requests_screen.dart';
+import '../home/dashboard_screen.dart';
+import 'my_pets_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
@@ -79,6 +81,38 @@ class ProfileScreen extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             children: [
+              _ActionCard(
+                icon: Icons.space_dashboard_rounded,
+                color: Colors.deepPurple,
+                title: t('dashboard'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DashboardScreen(
+                      petController: petController,
+                      reminderController: reminderController,
+                      careTipsController: careTipsController,
+                      adoptionController: adoptionController,
+                      serviceController: serviceController,
+                    ),
+                  ),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.pets_outlined,
+                color: Colors.teal,
+                title: t('my_pets'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MyPetsScreen(
+                      petController: petController,
+                      adoptionController: adoptionController,
+                      reminderController: reminderController,
+                    ),
+                  ),
+                ),
+              ),
               _ActionCard(
                 icon: Icons.favorite,
                 color: Colors.pinkAccent,
