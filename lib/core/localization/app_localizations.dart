@@ -94,6 +94,15 @@ class AppLocalizations {
       'empty_notifications': 'You are all caught up',
       'mark_read': 'Mark read',
       'new': 'New',
+      'achievements': 'Achievements',
+      'achievements_subtitle': 'Track badges and celebrate progress',
+      'achievements_hint': 'Boost a badge to unlock rewards faster.',
+      'reward_label': 'Reward: {0}',
+      'boost': 'Boost',
+      'claim': 'Claim',
+      'completed': 'Completed',
+      'timeline': 'Timeline',
+      'gallery': 'Gallery',
       'journal': 'Journal',
       'journal_recent': 'Recent journal',
       'add_entry': 'Add entry',
@@ -197,6 +206,15 @@ class AppLocalizations {
       'empty_notifications': 'لا توجد إشعارات جديدة',
       'mark_read': 'تحديد كمقروء',
       'new': 'جديد',
+      'achievements': 'الإنجازات',
+      'achievements_subtitle': 'تتبع الشارات واحتفل بالتقدم',
+      'achievements_hint': 'ادعم الشارة لفتح المكافآت أسرع.',
+      'reward_label': 'المكافأة: {0}',
+      'boost': 'تعزيز',
+      'claim': 'استلام',
+      'completed': 'مكتمل',
+      'timeline': 'الخط الزمني',
+      'gallery': 'المعرض',
       'journal': 'المفكرة',
       'journal_recent': 'آخر الملاحظات',
       'add_entry': 'إضافة ملاحظة',
@@ -215,8 +233,15 @@ class AppLocalizations {
     }
   };
 
-  String t(String key) => _translations[locale.languageCode]?[key] ??
-      _translations['en']![key] ?? key;
+  String t(String key, {List<String>? args}) {
+    var value = _translations[locale.languageCode]?[key] ?? _translations['en']![key] ?? key;
+    if (args != null && args.isNotEmpty) {
+      for (var i = 0; i < args.length; i++) {
+        value = value.replaceAll('{$i}', args[i]);
+      }
+    }
+    return value;
+  }
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations) ??

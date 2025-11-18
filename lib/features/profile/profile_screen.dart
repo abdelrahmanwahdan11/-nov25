@@ -20,6 +20,12 @@ import '../notifications/notification_controller.dart';
 import '../notifications/notifications_screen.dart';
 import '../journal/journal_controller.dart';
 import '../journal/pet_journal_screen.dart';
+import '../achievements/achievements_controller.dart';
+import '../achievements/achievements_screen.dart';
+import '../timeline/timeline_controller.dart';
+import '../timeline/activity_timeline_screen.dart';
+import '../gallery/gallery_controller.dart';
+import '../gallery/pet_gallery_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
@@ -31,6 +37,9 @@ class ProfileScreen extends StatelessWidget {
   final AdoptionController adoptionController;
   final NotificationController notificationController;
   final JournalController journalController;
+  final AchievementsController achievementsController;
+  final TimelineController timelineController;
+  final GalleryController galleryController;
   const ProfileScreen({
     super.key,
     required this.petController,
@@ -42,6 +51,9 @@ class ProfileScreen extends StatelessWidget {
     required this.adoptionController,
     required this.notificationController,
     required this.journalController,
+    required this.achievementsController,
+    required this.timelineController,
+    required this.galleryController,
   });
 
   @override
@@ -104,17 +116,20 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DashboardScreen(
-                      petController: petController,
-                      reminderController: reminderController,
-                      careTipsController: careTipsController,
-                      adoptionController: adoptionController,
-                      serviceController: serviceController,
-                      notificationController: notificationController,
-                      journalController: journalController,
-                    ),
+                  builder: (_) => DashboardScreen(
+                    petController: petController,
+                    reminderController: reminderController,
+                    careTipsController: careTipsController,
+                    adoptionController: adoptionController,
+                    serviceController: serviceController,
+                    notificationController: notificationController,
+                    journalController: journalController,
+                    achievementsController: achievementsController,
+                    timelineController: timelineController,
+                    galleryController: galleryController,
                   ),
                 ),
+              ),
               ),
               _ActionCard(
                 icon: Icons.pets_outlined,
@@ -189,6 +204,33 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => PetJournalScreen(controller: journalController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.emoji_events_outlined,
+                color: Colors.amber,
+                title: t('achievements'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AchievementsScreen(controller: achievementsController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.timeline,
+                color: Colors.cyan,
+                title: t('timeline'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ActivityTimelineScreen(controller: timelineController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.photo_library_rounded,
+                color: Colors.pinkAccent,
+                title: t('gallery'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => PetGalleryScreen(controller: galleryController)),
                 ),
               ),
               _ActionCard(

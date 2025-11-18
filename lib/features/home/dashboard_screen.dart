@@ -14,6 +14,12 @@ import '../home/pet_controller.dart';
 import '../services/service_controller.dart';
 import '../notifications/notification_controller.dart';
 import '../journal/journal_controller.dart';
+import '../achievements/achievements_controller.dart';
+import '../timeline/timeline_controller.dart';
+import '../gallery/gallery_controller.dart';
+import '../../data/models/pet_achievement.dart';
+import '../../data/models/timeline_event.dart';
+import '../../data/models/pet_moment.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PetController petController;
@@ -23,6 +29,9 @@ class DashboardScreen extends StatelessWidget {
   final ServiceController serviceController;
   final NotificationController notificationController;
   final JournalController journalController;
+  final AchievementsController achievementsController;
+  final TimelineController timelineController;
+  final GalleryController galleryController;
   const DashboardScreen({
     super.key,
     required this.petController,
@@ -32,6 +41,9 @@ class DashboardScreen extends StatelessWidget {
     required this.serviceController,
     required this.notificationController,
     required this.journalController,
+    required this.achievementsController,
+    required this.timelineController,
+    required this.galleryController,
   });
 
   @override
@@ -99,6 +111,15 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          _sectionTitle(t('achievements')),
+          _AchievementStrip(controller: achievementsController),
+          const SizedBox(height: 14),
+          _sectionTitle(t('timeline')),
+          _TimelineStrip(controller: timelineController),
+          const SizedBox(height: 14),
+          _sectionTitle(t('gallery')),
+          _GalleryStrip(controller: galleryController),
           const SizedBox(height: 16),
           _sectionTitle(t('notifications')),
           _NotificationStrip(controller: notificationController),
@@ -206,6 +227,202 @@ class _QuickCard extends StatelessWidget {
           ],
         ),
       ).animate().fadeIn().slide(begin: const Offset(0, 0.08)),
+    );
+  }
+}
+
+class _AchievementStrip extends StatelessWidget {
+  final AchievementsController controller;
+  const _AchievementStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 140,
+      child: StreamBuilder<List<PetAchievement>>(
+        stream: controller.achievementsStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 130, width: 220),
+              ),
+            );
+          }
+          final items = snapshot.data ?? [];
+          if (items.isEmpty) return const SizedBox.shrink();
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (_, i) {
+              final ach = items[i];
+              return Container(
+                width: 220,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 10))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(ach.iconUrl, width: 48, height: 48, fit: BoxFit.cover),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(ach.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold))),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: ach.progress,
+                      minHeight: 8,
+                      backgroundColor: Theme.of(context).dividerColor.withOpacity(0.2),
+                    ).animate().shimmer(duration: 1100.ms),
+                    const SizedBox(height: 6),
+                    Text('${(ach.progress * 100).round()}%', style: Theme.of(context).textTheme.labelMedium),
+                  ],
+                ),
+              ).animate().fadeIn(duration: 320.ms).slideX(begin: 0.05);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _TimelineStrip extends StatelessWidget {
+  final TimelineController controller;
+  const _TimelineStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 130,
+      child: StreamBuilder<List<TimelineEvent>>(
+        stream: controller.stream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 120, width: 200),
+              ),
+            );
+          }
+          final events = snapshot.data ?? [];
+          if (events.isEmpty) return const SizedBox.shrink();
+          final visible = events.take(4).toList();
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemCount: visible.length,
+            itemBuilder: (_, i) {
+              final e = visible[i];
+              final color = Color(int.parse(e.accent.replaceFirst('#', '0xff')));
+              return Container(
+                width: 200,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 10))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(color: color.withOpacity(0.16), shape: BoxShape.circle),
+                          child: Icon(Icons.timeline_rounded, size: 18, color: color),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(e.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const Spacer(),
+                    Text('${e.petName} · ${e.category}', style: Theme.of(context).textTheme.labelSmall),
+                  ],
+                ),
+              ).animate().fadeIn(duration: 320.ms).scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _GalleryStrip extends StatelessWidget {
+  final GalleryController controller;
+  const _GalleryStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 120,
+      child: StreamBuilder<List<PetMoment>>(
+        stream: controller.stream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 4,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 110, width: 160),
+              ),
+            );
+          }
+          final moments = snapshot.data ?? [];
+          if (moments.isEmpty) return const SizedBox.shrink();
+          final visible = moments.take(5).toList();
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: visible.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, i) {
+              final moment = visible[i];
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Stack(
+                  children: [
+                    Image.network(moment.imageUrl, width: 160, height: 120, fit: BoxFit.cover),
+                    Positioned(
+                      left: 8,
+                      bottom: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(moment.petName, style: const TextStyle(color: Colors.white)),
+                      ),
+                    )
+                  ],
+                ),
+              ).animate().fadeIn(duration: 280.ms).slideX(begin: 0.04);
+            },
+          );
+        },
+      ),
     );
   }
 }

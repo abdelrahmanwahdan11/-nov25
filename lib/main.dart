@@ -41,6 +41,12 @@ import 'features/notifications/notification_controller.dart';
 import 'features/notifications/notifications_screen.dart';
 import 'features/journal/journal_controller.dart';
 import 'features/journal/pet_journal_screen.dart';
+import 'features/achievements/achievements_controller.dart';
+import 'features/achievements/achievements_screen.dart';
+import 'features/timeline/timeline_controller.dart';
+import 'features/timeline/activity_timeline_screen.dart';
+import 'features/gallery/gallery_controller.dart';
+import 'features/gallery/pet_gallery_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,6 +82,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final FaqController faqController;
   late final NotificationController notificationController;
   late final JournalController journalController;
+  late final AchievementsController achievementsController;
+  late final TimelineController timelineController;
+  late final GalleryController galleryController;
 
   @override
   void initState() {
@@ -92,6 +101,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     faqController = FaqController()..load();
     notificationController = NotificationController()..load();
     journalController = JournalController()..load();
+    achievementsController = AchievementsController()..load();
+    timelineController = TimelineController()..load();
+    galleryController = GalleryController()..load();
   }
 
   @override
@@ -107,6 +119,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     faqController.dispose();
     notificationController.dispose();
     journalController.dispose();
+    achievementsController.dispose();
+    timelineController.dispose();
+    galleryController.dispose();
     super.dispose();
   }
 
@@ -156,6 +171,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   faqController: faqController,
                   notificationController: notificationController,
                   journalController: journalController,
+                  achievementsController: achievementsController,
+                  timelineController: timelineController,
+                  galleryController: galleryController,
                 ),
             '/dashboard': (_) => DashboardScreen(
                   petController: petController,
@@ -165,6 +183,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   serviceController: serviceController,
                   notificationController: notificationController,
                   journalController: journalController,
+                  achievementsController: achievementsController,
+                  timelineController: timelineController,
+                  galleryController: galleryController,
                 ),
             '/my-pets': (_) => MyPetsScreen(
                   petController: petController,
@@ -191,6 +212,9 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
             '/support/faq': (_) => FaqSupportScreen(controller: faqController),
             '/notifications': (_) => NotificationsScreen(controller: notificationController),
             '/journal': (_) => PetJournalScreen(controller: journalController),
+            '/achievements': (_) => AchievementsScreen(controller: achievementsController),
+            '/timeline': (_) => ActivityTimelineScreen(controller: timelineController),
+            '/gallery': (_) => PetGalleryScreen(controller: galleryController),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/pet/details' && settings.arguments is PetDetailsArgs) {
@@ -223,6 +247,9 @@ class RootShell extends StatelessWidget {
   final FaqController faqController;
   final NotificationController notificationController;
   final JournalController journalController;
+  final AchievementsController achievementsController;
+  final TimelineController timelineController;
+  final GalleryController galleryController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -238,6 +265,9 @@ class RootShell extends StatelessWidget {
     required this.faqController,
     required this.notificationController,
     required this.journalController,
+    required this.achievementsController,
+    required this.timelineController,
+    required this.galleryController,
   });
 
   @override
@@ -249,6 +279,9 @@ class RootShell extends StatelessWidget {
         reminderController: reminderController,
         notificationController: notificationController,
         journalController: journalController,
+        achievementsController: achievementsController,
+        timelineController: timelineController,
+        galleryController: galleryController,
       ),
       CatalogScreen(
         petController: petController,
@@ -265,6 +298,9 @@ class RootShell extends StatelessWidget {
         adoptionController: adoptionController,
         notificationController: notificationController,
         journalController: journalController,
+        achievementsController: achievementsController,
+        timelineController: timelineController,
+        galleryController: galleryController,
       ),
     ];
     return Scaffold(

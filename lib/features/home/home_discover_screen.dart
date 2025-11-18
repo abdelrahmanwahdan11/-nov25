@@ -10,6 +10,12 @@ import '../notifications/notification_controller.dart';
 import '../journal/journal_controller.dart';
 import '../../data/models/pet_journal_entry.dart';
 import '../../data/models/app_notification.dart';
+import '../achievements/achievements_controller.dart';
+import '../timeline/timeline_controller.dart';
+import '../gallery/gallery_controller.dart';
+import '../../data/models/timeline_event.dart';
+import '../../data/models/pet_moment.dart';
+import '../../data/models/pet_achievement.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
@@ -17,6 +23,9 @@ class HomeDiscoverScreen extends StatefulWidget {
   final ReminderController reminderController;
   final NotificationController notificationController;
   final JournalController journalController;
+  final AchievementsController achievementsController;
+  final TimelineController timelineController;
+  final GalleryController galleryController;
   const HomeDiscoverScreen({
     super.key,
     required this.petController,
@@ -24,6 +33,9 @@ class HomeDiscoverScreen extends StatefulWidget {
     required this.reminderController,
     required this.notificationController,
     required this.journalController,
+    required this.achievementsController,
+    required this.timelineController,
+    required this.galleryController,
   });
 
   @override
@@ -129,6 +141,12 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
               const SizedBox(height: 16),
               _journalPeek(context, t),
               const SizedBox(height: 16),
+              _achievementsPeek(context, t),
+              const SizedBox(height: 16),
+              _timelineStrip(context, t),
+              const SizedBox(height: 16),
+              _galleryStrip(context, t),
+              const SizedBox(height: 16),
               SizedBox(
                 height: 380,
                 child: StreamBuilder<List<Pet>>(
@@ -226,6 +244,189 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
               ],
             ),
           ).animate().fadeIn().slide(begin: const Offset(0, 0.06)),
+        );
+      },
+    );
+  }
+
+  Widget _achievementsPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<PetAchievement>>(
+      stream: widget.achievementsController.achievementsStream,
+      builder: (context, snapshot) {
+        final achievements = snapshot.data ?? [];
+        if (widget.achievementsController.isLoading && achievements.isEmpty) {
+          return const Skeleton(height: 110, width: double.infinity);
+        }
+        if (achievements.isEmpty) {
+          return _JournalCardPlaceholder(t: t, onTap: () => Navigator.pushNamed(context, '/achievements'));
+        }
+        return GestureDetector(
+          onTap: () => Navigator.pushNamed(context, '/achievements'),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 14, offset: const Offset(0, 8))],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: const Icon(Icons.emoji_events_outlined),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t('achievements'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(t('achievements_hint'), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded)
+              ],
+            ),
+          ).animate().fadeIn().slideY(begin: 0.05),
+        );
+      },
+    );
+  }
+
+  Widget _timelineStrip(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<TimelineEvent>>(
+      stream: widget.timelineController.stream,
+      builder: (context, snapshot) {
+        final events = snapshot.data ?? [];
+        if (widget.timelineController.isLoading && events.isEmpty) {
+          return const Skeleton(height: 110, width: double.infinity);
+        }
+        if (events.isEmpty) return const SizedBox.shrink();
+        final display = events.take(3).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(t('timeline'), style: Theme.of(context).textTheme.titleMedium),
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/timeline'),
+                  child: Text(t('view_all')),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: display.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (_, i) {
+                  final event = display[i];
+                  final color = Color(int.parse(event.accent.replaceFirst('#', '0xff')));
+                  return Container(
+                    width: 220,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 8))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(color: color.withOpacity(0.18), shape: BoxShape.circle),
+                              child: Icon(Icons.timeline_rounded, color: color),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(event.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text('${event.petName} · ${event.category}', style: Theme.of(context).textTheme.labelMedium),
+                        const SizedBox(height: 6),
+                        Text(event.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ).animate().slideX(begin: 0.08, duration: 350.ms).fadeIn(duration: 350.ms);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _galleryStrip(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<PetMoment>>(
+      stream: widget.galleryController.stream,
+      builder: (context, snapshot) {
+        final moments = snapshot.data ?? [];
+        if (widget.galleryController.isLoading && moments.isEmpty) {
+          return const Skeleton(height: 120, width: double.infinity);
+        }
+        if (moments.isEmpty) return const SizedBox.shrink();
+        final visible = moments.take(6).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(t('gallery'), style: Theme.of(context).textTheme.titleMedium),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pushNamed(context, '/gallery'),
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (_, i) {
+                  final moment = visible[i];
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      children: [
+                        Image.network(moment.imageUrl, width: 150, height: 120, fit: BoxFit.cover),
+                        Positioned(
+                          left: 8,
+                          bottom: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(moment.petName, style: const TextStyle(color: Colors.white)),
+                          ),
+                        )
+                      ],
+                    ).animate().scale(begin: const Offset(0.96, 0.96), end: const Offset(1, 1), duration: 320.ms).fadeIn(duration: 320.ms),
+                  );
+                },
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemCount: visible.length,
+              ),
+            )
+          ],
         );
       },
     );
