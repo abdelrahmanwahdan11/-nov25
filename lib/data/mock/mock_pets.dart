@@ -1,0 +1,68 @@
+import '../models/pet.dart';
+
+final mockPets = [
+  Pet(
+    id: 'p1',
+    name: 'Luna',
+    type: PetType.cat,
+    breed: 'Persian',
+    ageYears: 2,
+    weightKg: 3.2,
+    gender: 'Female',
+    distanceKm: 1.2,
+    rating: 4.9,
+    isVaccinated: true,
+    imageUrl: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131',
+    shortDescription: 'Cuddly cat looking for a calm home.',
+    longDescription:
+        'Luna loves sunny windows and gentle brushing. She is fully vaccinated and accustomed to apartment living.',
+  ),
+  Pet(
+    id: 'p2',
+    name: 'Bolt',
+    type: PetType.dog,
+    breed: 'Corgi',
+    ageYears: 1,
+    weightKg: 7.1,
+    gender: 'Male',
+    distanceKm: 3.4,
+    rating: 4.7,
+    isVaccinated: true,
+    imageUrl: 'https://images.unsplash.com/photo-1558788353-f76d92427f16',
+    shortDescription: 'Playful corgi with endless energy.',
+    longDescription:
+        'Bolt adores the outdoors and loves learning new tricks. Ideal for an active family.',
+  ),
+  Pet(
+    id: 'p3',
+    name: 'Sky',
+    type: PetType.bird,
+    breed: 'Parrot',
+    ageYears: 3,
+    weightKg: 0.4,
+    gender: 'Female',
+    distanceKm: 6.2,
+    rating: 4.5,
+    isVaccinated: true,
+    imageUrl: 'https://images.unsplash.com/photo-1501706362039-c06b2d715385',
+    shortDescription: 'Chatty companion with bright colors.',
+    longDescription:
+        'Sky can mimic short phrases and enjoys music. She is vaccinated and loves fruits.',
+  ),
+  Pet(
+    id: 'p4',
+    name: 'Finn',
+    type: PetType.fish,
+    breed: 'Betta',
+    ageYears: 1,
+    weightKg: 0.1,
+    gender: 'Male',
+    distanceKm: 0.3,
+    rating: 4.2,
+    isVaccinated: false,
+    imageUrl: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6',
+    shortDescription: 'Calm betta with deep blue fins.',
+    longDescription:
+        'Finn is low maintenance and brings color to your desk. Requires simple tank setup.',
+  ),
+];
