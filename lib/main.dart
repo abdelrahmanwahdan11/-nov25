@@ -57,6 +57,8 @@ import 'features/care/emergency_controller.dart';
 import 'features/care/emergency_screen.dart';
 import 'features/care/vet_visit_controller.dart';
 import 'features/care/vet_visits_screen.dart';
+import 'features/care/daily_checkin_controller.dart';
+import 'features/care/daily_checkin_screen.dart';
 import 'features/community/community_controller.dart';
 import 'features/community/community_events_screen.dart';
 import 'features/insights/insights_controller.dart';
@@ -106,6 +108,7 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final VetVisitController vetVisitController;
   late final CommunityController communityController;
   late final InsightsController insightsController;
+  late final DailyCheckinController dailyCheckinController;
 
   @override
   void initState() {
@@ -132,6 +135,7 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     vetVisitController = VetVisitController()..load();
     communityController = CommunityController()..load();
     insightsController = InsightsController()..load();
+    dailyCheckinController = DailyCheckinController()..load();
   }
 
   @override
@@ -157,6 +161,7 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     vetVisitController.dispose();
     communityController.dispose();
     insightsController.dispose();
+    dailyCheckinController.dispose();
     super.dispose();
   }
 
@@ -232,6 +237,7 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   vetVisitController: vetVisitController,
                   communityController: communityController,
                   insightsController: insightsController,
+                  dailyCheckinController: dailyCheckinController,
                 ),
             '/my-pets': (_) => MyPetsScreen(
                   petController: petController,
@@ -257,6 +263,7 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
             '/care/supplies': (_) => SuppliesScreen(controller: suppliesController),
             '/care/emergency': (_) => EmergencyScreen(controller: emergencyController),
             '/care/vet-visits': (_) => VetVisitsScreen(controller: vetVisitController),
+            '/care/checkins': (_) => DailyCheckinScreen(controller: dailyCheckinController),
             '/care/health': (_) => HealthRecordsScreen(controller: healthController),
             '/community': (_) => CommunityEventsScreen(controller: communityController),
             '/insights': (_) => InsightsScreen(controller: insightsController),
@@ -310,6 +317,7 @@ class RootShell extends StatelessWidget {
   final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
+  final DailyCheckinController dailyCheckinController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -335,6 +343,7 @@ class RootShell extends StatelessWidget {
     required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
+    required this.dailyCheckinController,
   });
 
   @override
@@ -356,6 +365,7 @@ class RootShell extends StatelessWidget {
         insightsController: insightsController,
         mealPlanController: mealPlanController,
         vetVisitController: vetVisitController,
+        dailyCheckinController: dailyCheckinController,
       ),
       CatalogScreen(
         petController: petController,
@@ -382,6 +392,7 @@ class RootShell extends StatelessWidget {
         vetVisitController: vetVisitController,
         communityController: communityController,
         insightsController: insightsController,
+        dailyCheckinController: dailyCheckinController,
       ),
     ];
     return Scaffold(

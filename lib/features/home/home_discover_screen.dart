@@ -30,6 +30,8 @@ import '../community/community_controller.dart';
 import '../../data/models/community_event.dart';
 import '../insights/insights_controller.dart';
 import '../../data/models/insight_metric.dart';
+import '../care/daily_checkin_controller.dart';
+import '../../data/models/daily_checkin.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
@@ -47,6 +49,7 @@ class HomeDiscoverScreen extends StatefulWidget {
   final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
+  final DailyCheckinController dailyCheckinController;
   const HomeDiscoverScreen({
     super.key,
     required this.petController,
@@ -64,6 +67,7 @@ class HomeDiscoverScreen extends StatefulWidget {
     required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
+    required this.dailyCheckinController,
   });
 
   @override
@@ -172,6 +176,8 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
               _communityPeek(context, t),
               const SizedBox(height: 16),
               _plannerPeek(context, t),
+              const SizedBox(height: 12),
+              _checkinPeek(context, t),
               const SizedBox(height: 12),
               _mealPlanPeek(context, t),
               const SizedBox(height: 12),
@@ -292,6 +298,27 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
           subtitle: top != null ? '${top.title} · ${top.scheduledAt}' : t('care_planner_subtitle'),
           icon: Icons.bolt_rounded,
           onTap: () => Navigator.pushNamed(context, '/care/planner'),
+        );
+      },
+    );
+  }
+
+  Widget _checkinPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<DailyCheckin>>(
+      stream: widget.dailyCheckinController.itemsStream,
+      builder: (context, snapshot) {
+        if (widget.dailyCheckinController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final items = snapshot.data ?? [];
+        final latest = items.isNotEmpty ? items.first : null;
+        return _PeekCard(
+          title: t('daily_checkins'),
+          subtitle: latest != null
+              ? '${latest.petName} · ${latest.timeLabel} · ${t('mood')}: ${latest.mood}'
+              : t('checkin_empty'),
+          icon: Icons.check_circle_outline,
+          onTap: () => Navigator.pushNamed(context, '/care/checkins'),
         );
       },
     );

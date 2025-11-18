@@ -36,6 +36,8 @@ import '../care/meal_plan_controller.dart';
 import '../care/meal_plan_screen.dart';
 import '../care/vet_visit_controller.dart';
 import '../care/vet_visits_screen.dart';
+import '../care/daily_checkin_controller.dart';
+import '../care/daily_checkin_screen.dart';
 import '../community/community_controller.dart';
 import '../community/community_events_screen.dart';
 import '../insights/insights_controller.dart';
@@ -61,6 +63,7 @@ class ProfileScreen extends StatelessWidget {
   final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
+  final DailyCheckinController dailyCheckinController;
   const ProfileScreen({
     super.key,
     required this.petController,
@@ -82,6 +85,7 @@ class ProfileScreen extends StatelessWidget {
     required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
+    required this.dailyCheckinController,
   });
 
   @override
@@ -229,17 +233,26 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 _ActionCard(
-                  icon: Icons.restaurant_menu_rounded,
-                  color: Colors.orange,
-                  title: t('meal_plan'),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => MealPlanScreen(controller: mealPlanController)),
-                  ),
+                icon: Icons.restaurant_menu_rounded,
+                color: Colors.orange,
+                title: t('meal_plan'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MealPlanScreen(controller: mealPlanController)),
                 ),
-                _ActionCard(
-                  icon: Icons.celebration_outlined,
-                  color: Colors.deepOrange,
+              ),
+              _ActionCard(
+                icon: Icons.checklist_rtl_rounded,
+                color: Colors.lightGreen,
+                title: t('daily_checkins'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => DailyCheckinScreen(controller: dailyCheckinController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.celebration_outlined,
+                color: Colors.deepOrange,
                 title: t('community_events'),
                 onTap: () => Navigator.push(
                   context,
