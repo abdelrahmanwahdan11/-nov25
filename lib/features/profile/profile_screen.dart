@@ -32,6 +32,10 @@ import '../care/supplies_controller.dart';
 import '../care/supplies_screen.dart';
 import '../care/emergency_controller.dart';
 import '../care/emergency_screen.dart';
+import '../community/community_controller.dart';
+import '../community/community_events_screen.dart';
+import '../insights/insights_controller.dart';
+import '../insights/insights_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final PetController petController;
@@ -49,6 +53,8 @@ class ProfileScreen extends StatelessWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final CommunityController communityController;
+  final InsightsController insightsController;
   const ProfileScreen({
     super.key,
     required this.petController,
@@ -66,6 +72,8 @@ class ProfileScreen extends StatelessWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.communityController,
+    required this.insightsController,
   });
 
   @override
@@ -142,6 +150,8 @@ class ProfileScreen extends StatelessWidget {
                       carePlannerController: carePlannerController,
                       suppliesController: suppliesController,
                       emergencyController: emergencyController,
+                      communityController: communityController,
+                      insightsController: insightsController,
                     ),
                   ),
                 ),
@@ -188,6 +198,24 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => EmergencyScreen(controller: emergencyController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.donut_small_outlined,
+                color: Colors.amber,
+                title: t('insights'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => InsightsScreen(controller: insightsController)),
+                ),
+              ),
+              _ActionCard(
+                icon: Icons.celebration_outlined,
+                color: Colors.deepOrange,
+                title: t('community_events'),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => CommunityEventsScreen(controller: communityController)),
                 ),
               ),
               _ActionCard(

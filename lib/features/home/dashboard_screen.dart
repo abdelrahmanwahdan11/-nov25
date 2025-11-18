@@ -26,6 +26,10 @@ import '../care/emergency_controller.dart';
 import '../../data/models/care_plan_item.dart';
 import '../../data/models/pet_supply.dart';
 import '../../data/models/emergency_guide.dart';
+import '../community/community_controller.dart';
+import '../../data/models/community_event.dart';
+import '../insights/insights_controller.dart';
+import '../../data/models/insight_metric.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PetController petController;
@@ -41,6 +45,8 @@ class DashboardScreen extends StatelessWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final CommunityController communityController;
+  final InsightsController insightsController;
   const DashboardScreen({
     super.key,
     required this.petController,
@@ -56,6 +62,8 @@ class DashboardScreen extends StatelessWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.communityController,
+    required this.insightsController,
   });
 
   @override
@@ -123,6 +131,10 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          _insightsHighlight(context, t),
+          const SizedBox(height: 12),
+          _communityStrip(context, t),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -232,6 +244,165 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _insightsHighlight(BuildContext context, String Function(String) t) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(t('insights')),
+        StreamBuilder<List<InsightMetric>>(
+          stream: insightsController.metricsStream,
+          builder: (context, snapshot) {
+            if (insightsController.isLoading) {
+              return const Skeleton(height: 110, width: double.infinity);
+            }
+            final metrics = snapshot.data ?? [];
+            if (metrics.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(t('empty_insights')),
+              );
+            }
+            final top = metrics.firstWhere((m) => m.highlight, orElse: () => metrics.first);
+            return Container(
+              margin: const EdgeInsets.only(top: 6),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 10))],
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 68,
+                    height: 68,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0, end: top.progress),
+                          duration: 500.ms,
+                          curve: Curves.easeOut,
+                          builder: (_, value, __) => CircularProgressIndicator(
+                            value: value,
+                            strokeWidth: 7,
+                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.16),
+                            valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+                          ),
+                        ),
+                        Text('${(top.progress * 100).round()}%'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(top.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 6),
+                        Text(top.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 8),
+                        Text(top.trend, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).primaryColor)),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pushNamed(context, '/insights'),
+                    icon: const Icon(Icons.chevron_right_rounded),
+                  )
+                ],
+              ),
+            ).animate().fadeIn(duration: 350.ms).slide(begin: const Offset(0, 0.05));
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _communityStrip(BuildContext context, String Function(String) t) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(t('community_events')),
+        const SizedBox(height: 8),
+        StreamBuilder<List<CommunityEvent>>(
+          stream: communityController.eventsStream,
+          builder: (context, snapshot) {
+            if (communityController.isLoading) {
+              return SizedBox(
+                height: 150,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (_, __) => const Skeleton(height: 140, width: 220),
+                ),
+              );
+            }
+            final events = snapshot.data ?? [];
+            if (events.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(t('empty_events')),
+              );
+            }
+            return SizedBox(
+              height: 160,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: events.length,
+                itemBuilder: (_, i) {
+                  final e = events[i];
+                  return GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/community'),
+                    child: Container(
+                      width: 230,
+                      margin: EdgeInsets.only(right: i == events.length - 1 ? 0 : 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(18),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 10))],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                              Icon(Icons.play_circle_fill_outlined, color: Theme.of(context).primaryColor)
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(e.imageUrl, height: 70, width: double.infinity, fit: BoxFit.cover),
+                          ),
+                          const SizedBox(height: 8),
+                          Text('${_dateLabel(e.date)} • ${e.isOnline ? t('online') : '${e.distanceKm.toStringAsFixed(1)} km'}',
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ).animate(delay: (i * 60).ms).fadeIn().scale(begin: const Offset(0.96, 0.96));
+                },
+              ),
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  String _dateLabel(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$month/$day';
   }
 
   Widget _sectionTitle(String label) => Padding(

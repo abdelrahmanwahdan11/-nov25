@@ -53,6 +53,10 @@ import 'features/care/supplies_controller.dart';
 import 'features/care/supplies_screen.dart';
 import 'features/care/emergency_controller.dart';
 import 'features/care/emergency_screen.dart';
+import 'features/community/community_controller.dart';
+import 'features/community/community_events_screen.dart';
+import 'features/insights/insights_controller.dart';
+import 'features/insights/insights_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +98,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
   late final GalleryController galleryController;
   late final SuppliesController suppliesController;
   late final EmergencyController emergencyController;
+  late final CommunityController communityController;
+  late final InsightsController insightsController;
 
   @override
   void initState() {
@@ -116,6 +122,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     galleryController = GalleryController()..load();
     suppliesController = SuppliesController()..load();
     emergencyController = EmergencyController()..load();
+    communityController = CommunityController()..load();
+    insightsController = InsightsController()..load();
   }
 
   @override
@@ -137,6 +145,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
     carePlannerController.dispose();
     suppliesController.dispose();
     emergencyController.dispose();
+    communityController.dispose();
+    insightsController.dispose();
     super.dispose();
   }
 
@@ -207,6 +217,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
                   carePlannerController: carePlannerController,
                   suppliesController: suppliesController,
                   emergencyController: emergencyController,
+                  communityController: communityController,
+                  insightsController: insightsController,
                 ),
             '/my-pets': (_) => MyPetsScreen(
                   petController: petController,
@@ -231,6 +243,8 @@ class _PawAdoptAppState extends State<PawAdoptApp> {
             '/care/supplies': (_) => SuppliesScreen(controller: suppliesController),
             '/care/emergency': (_) => EmergencyScreen(controller: emergencyController),
             '/care/health': (_) => HealthRecordsScreen(controller: healthController),
+            '/community': (_) => CommunityEventsScreen(controller: communityController),
+            '/insights': (_) => InsightsScreen(controller: insightsController),
             '/adoption/requests': (_) => AdoptionRequestsScreen(controller: adoptionController),
             '/training': (_) => TrainingScreen(controller: trainingController),
             '/support/faq': (_) => FaqSupportScreen(controller: faqController),
@@ -277,6 +291,8 @@ class RootShell extends StatelessWidget {
   final GalleryController galleryController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final CommunityController communityController;
+  final InsightsController insightsController;
   const RootShell({
     super.key,
     required this.themeController,
@@ -298,6 +314,8 @@ class RootShell extends StatelessWidget {
     required this.galleryController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.communityController,
+    required this.insightsController,
   });
 
   @override
@@ -309,13 +327,15 @@ class RootShell extends StatelessWidget {
         reminderController: reminderController,
         notificationController: notificationController,
         journalController: journalController,
-        achievementsController: achievementsController,
-        timelineController: timelineController,
-        galleryController: galleryController,
-        carePlannerController: carePlannerController,
-        suppliesController: suppliesController,
-        emergencyController: emergencyController,
-      ),
+                  achievementsController: achievementsController,
+                  timelineController: timelineController,
+                  galleryController: galleryController,
+                  carePlannerController: carePlannerController,
+                  suppliesController: suppliesController,
+                  emergencyController: emergencyController,
+                  communityController: communityController,
+                  insightsController: insightsController,
+                ),
       CatalogScreen(
         petController: petController,
         adoptionController: adoptionController,
@@ -337,6 +357,8 @@ class RootShell extends StatelessWidget {
         carePlannerController: carePlannerController,
         suppliesController: suppliesController,
         emergencyController: emergencyController,
+        communityController: communityController,
+        insightsController: insightsController,
       ),
     ];
     return Scaffold(

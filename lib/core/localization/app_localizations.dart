@@ -135,6 +135,15 @@ class AppLocalizations {
       'emergency_description': 'Save checklists and hotlines for stressful moments.',
       'open_guide': 'Open guide',
       'hotline_label': 'Hotline: {number}',
+      'community_events': 'Community events',
+      'event_join': 'Join / Watch',
+      'event_spots': 'Limited spots today',
+      'empty_events': 'No events yet',
+      'online': 'Online',
+      'insights': 'Insights',
+      'wellness_overview': 'Wellness overview',
+      'empty_insights': 'No insights yet',
+      'progress': 'progress',
     },
     'ar': {
       'discover_title': 'اكتشف',
@@ -264,6 +273,15 @@ class AppLocalizations {
       'emergency_description': 'احتفظ بالقوائم وأرقام الطوارئ للحظات الحرجة.',
       'open_guide': 'فتح الدليل',
       'hotline_label': 'خط الطوارئ: {number}',
+      'community_events': 'فعاليات المجتمع',
+      'event_join': 'انضم / شاهد',
+      'event_spots': 'أماكن محدودة اليوم',
+      'empty_events': 'لا توجد فعاليات بعد',
+      'online': 'أونلاين',
+      'insights': 'التحليلات',
+      'wellness_overview': 'نظرة العافية',
+      'empty_insights': 'لا توجد تحليلات بعد',
+      'progress': 'تقدم',
     }
   };
 

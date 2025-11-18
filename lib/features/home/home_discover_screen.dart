@@ -22,6 +22,10 @@ import '../care/emergency_controller.dart';
 import '../../data/models/care_plan_item.dart';
 import '../../data/models/pet_supply.dart';
 import '../../data/models/emergency_guide.dart';
+import '../community/community_controller.dart';
+import '../../data/models/community_event.dart';
+import '../insights/insights_controller.dart';
+import '../../data/models/insight_metric.dart';
 
 class HomeDiscoverScreen extends StatefulWidget {
   final PetController petController;
@@ -35,6 +39,8 @@ class HomeDiscoverScreen extends StatefulWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final CommunityController communityController;
+  final InsightsController insightsController;
   const HomeDiscoverScreen({
     super.key,
     required this.petController,
@@ -48,6 +54,8 @@ class HomeDiscoverScreen extends StatefulWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.communityController,
+    required this.insightsController,
   });
 
   @override
@@ -151,6 +159,10 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              _insightsPeek(context, t),
+              const SizedBox(height: 12),
+              _communityPeek(context, t),
+              const SizedBox(height: 16),
               _plannerPeek(context, t),
               const SizedBox(height: 12),
               _suppliesPeek(context, t),
@@ -211,6 +223,46 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _insightsPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<InsightMetric>>(
+      stream: widget.insightsController.metricsStream,
+      builder: (context, snapshot) {
+        if (widget.insightsController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final metrics = snapshot.data ?? [];
+        final m = metrics.isNotEmpty ? metrics.first : null;
+        return _PeekCard(
+          title: t('insights'),
+          subtitle: m != null ? '${(m.progress * 100).round()}% · ${m.trend}' : t('empty_insights'),
+          icon: Icons.donut_small_outlined,
+          onTap: () => Navigator.pushNamed(context, '/insights'),
+        );
+      },
+    );
+  }
+
+  Widget _communityPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<CommunityEvent>>(
+      stream: widget.communityController.eventsStream,
+      builder: (context, snapshot) {
+        if (widget.communityController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final events = snapshot.data ?? [];
+        final e = events.isNotEmpty ? events.first : null;
+        return _PeekCard(
+          title: t('community_events'),
+          subtitle: e != null
+              ? '${e.title} · ${e.isOnline ? t('online') : '${e.distanceKm.toStringAsFixed(1)} km'}'
+              : t('empty_events'),
+          icon: Icons.celebration_outlined,
+          onTap: () => Navigator.pushNamed(context, '/community'),
+        );
+      },
     );
   }
 
