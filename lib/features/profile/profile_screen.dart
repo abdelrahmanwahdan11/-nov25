@@ -32,6 +32,10 @@ import '../care/supplies_controller.dart';
 import '../care/supplies_screen.dart';
 import '../care/emergency_controller.dart';
 import '../care/emergency_screen.dart';
+import '../care/meal_plan_controller.dart';
+import '../care/meal_plan_screen.dart';
+import '../care/vet_visit_controller.dart';
+import '../care/vet_visits_screen.dart';
 import '../community/community_controller.dart';
 import '../community/community_events_screen.dart';
 import '../insights/insights_controller.dart';
@@ -53,6 +57,8 @@ class ProfileScreen extends StatelessWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final MealPlanController mealPlanController;
+  final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
   const ProfileScreen({
@@ -72,6 +78,8 @@ class ProfileScreen extends StatelessWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.mealPlanController,
+    required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
   });
@@ -150,6 +158,8 @@ class ProfileScreen extends StatelessWidget {
                       carePlannerController: carePlannerController,
                       suppliesController: suppliesController,
                       emergencyController: emergencyController,
+                      mealPlanController: mealPlanController,
+                      vetVisitController: vetVisitController,
                       communityController: communityController,
                       insightsController: insightsController,
                     ),
@@ -191,27 +201,45 @@ class ProfileScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => SuppliesScreen(controller: suppliesController)),
                 ),
               ),
-              _ActionCard(
-                icon: Icons.health_and_safety_outlined,
-                color: Colors.redAccent,
-                title: t('emergency_ready'),
-                onTap: () => Navigator.push(
+                _ActionCard(
+                  icon: Icons.health_and_safety_outlined,
+                  color: Colors.redAccent,
+                  title: t('emergency_ready'),
+                  onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => EmergencyScreen(controller: emergencyController)),
                 ),
               ),
-              _ActionCard(
-                icon: Icons.donut_small_outlined,
-                color: Colors.amber,
-                title: t('insights'),
-                onTap: () => Navigator.push(
+                _ActionCard(
+                  icon: Icons.donut_small_outlined,
+                  color: Colors.amber,
+                  title: t('insights'),
+                  onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => InsightsScreen(controller: insightsController)),
+                  ),
                 ),
-              ),
-              _ActionCard(
-                icon: Icons.celebration_outlined,
-                color: Colors.deepOrange,
+                _ActionCard(
+                  icon: Icons.local_hospital_outlined,
+                  color: Colors.redAccent,
+                  title: t('vet_visits'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => VetVisitsScreen(controller: vetVisitController)),
+                  ),
+                ),
+                _ActionCard(
+                  icon: Icons.restaurant_menu_rounded,
+                  color: Colors.orange,
+                  title: t('meal_plan'),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => MealPlanScreen(controller: mealPlanController)),
+                  ),
+                ),
+                _ActionCard(
+                  icon: Icons.celebration_outlined,
+                  color: Colors.deepOrange,
                 title: t('community_events'),
                 onTap: () => Navigator.push(
                   context,

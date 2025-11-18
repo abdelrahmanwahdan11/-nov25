@@ -30,6 +30,10 @@ import '../community/community_controller.dart';
 import '../../data/models/community_event.dart';
 import '../insights/insights_controller.dart';
 import '../../data/models/insight_metric.dart';
+import '../care/meal_plan_controller.dart';
+import '../care/vet_visit_controller.dart';
+import '../../data/models/meal_plan_item.dart';
+import '../../data/models/vet_visit.dart';
 
 class DashboardScreen extends StatelessWidget {
   final PetController petController;
@@ -45,6 +49,8 @@ class DashboardScreen extends StatelessWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final MealPlanController mealPlanController;
+  final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
   const DashboardScreen({
@@ -62,6 +68,8 @@ class DashboardScreen extends StatelessWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.mealPlanController,
+    required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
   });
@@ -132,6 +140,26 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.local_hospital_outlined,
+                  label: t('vet_visits'),
+                  onTap: () => Navigator.pushNamed(context, '/care/vet-visits'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickCard(
+                  icon: Icons.restaurant_menu_rounded,
+                  label: t('meal_plan'),
+                  onTap: () => Navigator.pushNamed(context, '/care/meals'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           _insightsHighlight(context, t),
           const SizedBox(height: 12),
           _communityStrip(context, t),
@@ -187,6 +215,12 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _sectionTitle(t('emergency_ready')),
           _EmergencyStrip(controller: emergencyController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('vet_visits')),
+          _VetStrip(controller: vetVisitController),
+          const SizedBox(height: 16),
+          _sectionTitle(t('meal_plan')),
+          _MealStrip(controller: mealPlanController),
           const SizedBox(height: 16),
           _sectionTitle(t('upcoming_reminders')),
           _ReminderStrip(controller: reminderController),
@@ -1035,6 +1069,181 @@ class _EmergencyStrip extends StatelessWidget {
                   ],
                 ),
               ).animate().fadeIn().slide(begin: const Offset(0, 0.08));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _VetStrip extends StatelessWidget {
+  final VetVisitController controller;
+  const _VetStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 150,
+      child: StreamBuilder<List<VetVisit>>(
+        stream: controller.visitsStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 2,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 140, width: 220),
+              ),
+            );
+          }
+          final visits = snapshot.data ?? [];
+          if (visits.isEmpty) return Center(child: Text(t('upcoming_visit')));
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: visits.length,
+            itemBuilder: (_, i) {
+              final v = visits[i];
+              final statusColor = v.status == 'completed'
+                  ? Colors.green
+                  : v.status == 'urgent'
+                      ? Colors.redAccent
+                      : Theme.of(context).primaryColor;
+              return Container(
+                width: 220,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(radius: 18, backgroundImage: NetworkImage(v.imageUrl)),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text('${v.petName} · ${TimeOfDay.fromDateTime(v.dateTime).format(context)}')),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(v.clinicName, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    Text(v.reason, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            v.status == 'completed'
+                                ? t('completed_visit')
+                                : v.status == 'urgent'
+                                    ? t('urgent')
+                                    : t('upcoming_visit'),
+                            style: TextStyle(color: statusColor, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.local_hospital_outlined, color: statusColor),
+                      ],
+                    )
+                  ],
+                ),
+              ).animate().fadeIn().slide(begin: const Offset(0, 0.08));
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MealStrip extends StatelessWidget {
+  final MealPlanController controller;
+  const _MealStrip({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context).t;
+    return SizedBox(
+      height: 130,
+      child: StreamBuilder<List<MealPlanItem>>(
+        stream: controller.itemsStream,
+        builder: (context, snapshot) {
+          if (controller.isLoading) {
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: Skeleton(height: 120, width: 190),
+              ),
+            );
+          }
+          final meals = snapshot.data ?? [];
+          if (meals.isEmpty) return Center(child: Text(t('meal_plan')));
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: meals.length,
+            itemBuilder: (_, i) {
+              final m = meals[i];
+              return Container(
+                width: 190,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 8)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.restaurant_menu_rounded, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        Text(m.time.format(context)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(m.meal, maxLines: 2, style: Theme.of(context).textTheme.titleMedium),
+                    Text('${m.petName} · ${t('calories')}: ${m.calories}', style: Theme.of(context).textTheme.bodySmall),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: (m.isDone ? Colors.green : Theme.of(context).primaryColor).withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            m.isDone ? t('mark_done') : t('mark_eaten'),
+                            style: TextStyle(
+                              color: m.isDone ? Colors.green : Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(m.isDone ? Icons.check_circle : Icons.schedule_rounded,
+                            color: m.isDone ? Colors.green : Theme.of(context).primaryColor)
+                      ],
+                    )
+                  ],
+                ),
+              ).animate().fadeIn().slide(begin: const Offset(0, 0.06));
             },
           );
         },

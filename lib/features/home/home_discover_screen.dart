@@ -22,6 +22,10 @@ import '../care/emergency_controller.dart';
 import '../../data/models/care_plan_item.dart';
 import '../../data/models/pet_supply.dart';
 import '../../data/models/emergency_guide.dart';
+import '../care/meal_plan_controller.dart';
+import '../care/vet_visit_controller.dart';
+import '../../data/models/meal_plan_item.dart';
+import '../../data/models/vet_visit.dart';
 import '../community/community_controller.dart';
 import '../../data/models/community_event.dart';
 import '../insights/insights_controller.dart';
@@ -39,6 +43,8 @@ class HomeDiscoverScreen extends StatefulWidget {
   final CarePlannerController carePlannerController;
   final SuppliesController suppliesController;
   final EmergencyController emergencyController;
+  final MealPlanController mealPlanController;
+  final VetVisitController vetVisitController;
   final CommunityController communityController;
   final InsightsController insightsController;
   const HomeDiscoverScreen({
@@ -54,6 +60,8 @@ class HomeDiscoverScreen extends StatefulWidget {
     required this.carePlannerController,
     required this.suppliesController,
     required this.emergencyController,
+    required this.mealPlanController,
+    required this.vetVisitController,
     required this.communityController,
     required this.insightsController,
   });
@@ -165,9 +173,13 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
               const SizedBox(height: 16),
               _plannerPeek(context, t),
               const SizedBox(height: 12),
+              _mealPlanPeek(context, t),
+              const SizedBox(height: 12),
               _suppliesPeek(context, t),
               const SizedBox(height: 12),
               _emergencyPeek(context, t),
+              const SizedBox(height: 12),
+              _vetPeek(context, t),
               const SizedBox(height: 16),
               _journalPeek(context, t),
               const SizedBox(height: 16),
@@ -285,6 +297,26 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
     );
   }
 
+  Widget _mealPlanPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<MealPlanItem>>(
+      stream: widget.mealPlanController.itemsStream,
+      builder: (context, snapshot) {
+        if (widget.mealPlanController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final meals = snapshot.data ?? [];
+        final first = meals.isNotEmpty ? meals.first : null;
+        return _PeekCard(
+          title: t('today_meals'),
+          subtitle:
+              first != null ? '${first.petName} · ${first.time.format(context)}' : t('meal_plan'),
+          icon: Icons.restaurant_menu_rounded,
+          onTap: () => Navigator.pushNamed(context, '/care/meals'),
+        );
+      },
+    );
+  }
+
   Widget _suppliesPeek(BuildContext context, String Function(String) t) {
     return StreamBuilder<List<PetSupply>>(
       stream: widget.suppliesController.suppliesStream,
@@ -318,6 +350,26 @@ class _HomeDiscoverScreenState extends State<HomeDiscoverScreen> {
           subtitle: text,
           icon: Icons.health_and_safety_rounded,
           onTap: () => Navigator.pushNamed(context, '/care/emergency'),
+        );
+      },
+    );
+  }
+
+  Widget _vetPeek(BuildContext context, String Function(String) t) {
+    return StreamBuilder<List<VetVisit>>(
+      stream: widget.vetVisitController.visitsStream,
+      builder: (context, snapshot) {
+        if (widget.vetVisitController.isLoading) {
+          return const Skeleton(height: 100, width: double.infinity);
+        }
+        final visits = (snapshot.data ?? []).where((v) => v.status != 'completed').toList();
+        final next = visits.isNotEmpty ? visits.first : null;
+        final time = next != null ? TimeOfDay.fromDateTime(next.dateTime).format(context) : '';
+        return _PeekCard(
+          title: t('vet_visits'),
+          subtitle: next != null ? '${next.petName} · $time' : t('upcoming_visit'),
+          icon: Icons.local_hospital_outlined,
+          onTap: () => Navigator.pushNamed(context, '/care/vet-visits'),
         );
       },
     );
